@@ -85,4 +85,7 @@ Compared to the last line of the previous code, it is much less readable, and re
 
 As said before, Bash-In-the-Box does not require installation: the entire library can be copied into the directory containing the calling script.
 
-However it can be used as a system-wide library, by just copying it into some directory and setting the `BIB_HOME` environment variable to its path.
+However it can be used as a system-wide library, by just copying it into some directory and setting the `BIB_HOME` environment variable to its path. As long as `BIB_HOME` is correctly set, the following code can be safely used:
+
+    source ${BIB_HOME}/main.lib.sh
+
