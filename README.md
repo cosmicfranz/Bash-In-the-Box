@@ -89,3 +89,8 @@ However it can be used as a system-wide library, by just copying it into some di
 
     source ${BIB_HOME}/main.lib.sh
 
+## Abbreviations
+
+* Bitbox
+* BItB
+* BIB
