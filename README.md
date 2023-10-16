@@ -9,7 +9,7 @@ A framework for Bash >= 5 aimed at *simplifying* code creation and organization.
 In order to obtain such simplicity, this framework has been thought with a few requirements in mind:
 
 * zero step, **drop-in installation**; it must work *out of the box*
-* **unobtrusivity**, that is, shallow learning curve, no imposition on coding style, no gobbledegook syntax (or, at least, not worse than plain Bash syntax), gradual introduction of features
+* **unobtrusiveness**, that is, shallow learning curve, no imposition on coding style, no gobbledygook syntax (or, at least, not worse than plain Bash syntax), gradual introduction of features
 * **usefulness and modularity**: include only code that is really needed
 * the code has to be **pure Bash**, as much as possible, thus reducing dependencies on external software
 * at the same time, good coding practices and readability must be encouraged
@@ -64,3 +64,25 @@ To obtain the same effect using plain Bash, the script would look like this:
     printf "\033[1mHello world\033[21m, with some \033[3mstyle\033[23m\n" >&2
 
 Compared to the last line of the previous code, it is much less readable, and requires remembering escape codes that modify the font style; moreover we have to fiddle with output redirection.
+
+## Features
+
+* functions for text processing and formatting
+* file and directory manipulation
+* logging to files, syslog, console
+* unit testing
+* functions for array manipulation
+* configuration through files
+* basic DB operations (currently support only for SQLite)
+
+## Limitations
+
+* For now it is Bash specific
+* developed and tested only on Linux
+* not caring of POSIX compliance
+
+## Installation
+
+As said before, Bash-In-the-Box does not require installation: the entire library can be copied into the directory containing the calling script.
+
+However it can be used as a system-wide library, by just copying it into some directory and setting the `BIB_HOME` environment variable to its path.
