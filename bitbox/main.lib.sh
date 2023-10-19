@@ -84,7 +84,7 @@ readonly BIB_REL_TYPE="dev"
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20231015"
+readonly BIB_REL_DATE="20231019"
 
 
 ## BOOLEAN CONSTANTS
@@ -422,6 +422,38 @@ declare -A _BIB_LIBS=(
 # * NO-OP STUB
 # */
 function bib.assert() { : ; }
+
+
+#/**
+# * Returns the last part of a path.
+# *
+# * It is a pure Bash alternative to “basename” from Coreutils, of which
+# * implements the basic feature of stripping the directory part from a path.
+# *
+# * Trailing path separators will be removed.
+# *
+# * Syntax: bib.basename PATH
+# *
+# * @param PATH
+# */
+function bib.basename() {
+    (( ${#} == 1 )) || return ${BIB_E_ARG}
+
+    local _path="${1}"
+    local -i _status_extglob=${BIB_E_NOK}
+
+    shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
+    bib.ok ${_status_extglob} || shopt -s extglob
+    _path="${_path%%+(/)}"
+    if [[ -z "$_path" ]]
+    then
+        printf "/"
+    else
+        printf "${_path##*/}"
+    fi
+
+    bib.ok ${_status_extglob} && shopt -u extglob
+}
 
 
 #/**
