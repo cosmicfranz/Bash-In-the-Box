@@ -24,7 +24,7 @@
 # * Provides an API for unit testing.
 # */
 
-bib.include assert
+bib.include _assert
 
 
 ########################################
@@ -124,7 +124,8 @@ function bib.unittest.run() {
     local _args=${@:-${!bib_unittest_tests[@]}}
     local -a _tests=()
     local _test
-    local _i
+    local -i _i
+    local -i _status=${BIB_E_OK}
 
     (( ${#bib_unittest_tests_order} )) || bib_unittest_tests_order=( ${!bib_unittest_tests[@]} )
 
@@ -146,12 +147,14 @@ function bib.unittest.run() {
             continue
         fi
 
-        test_${_test}
+        test_${_test} || _status=${BIB_E_NOK}
 
         printf "\n"
 
         bib_unittest_current_test=""
     done
+
+    return ${_status}
 }
 
 
@@ -265,7 +268,6 @@ function bib.unittest.assert() {
 ########################################
 
 
-bib.include _assert
 BIB_ASSERT_ENABLE=${BIB_TRUE}
 
 (( BIB_CONFIG["unittest.verbose"] )) && BIB_UNITTEST_VERBOSE=${BIB_TRUE}
