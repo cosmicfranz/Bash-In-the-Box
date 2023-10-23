@@ -481,19 +481,55 @@ function bib.contains() {
 
 
 #/**
+# * Returns the path to a file or a directory.
 # *
+# * It is a pure Bash alternative to “dirname” from Coreutils.
 # *
+# * Trailing path separators will be removed.
 # *
+# * Syntax: bib.dirname PATH
 # *
-# *
-# *
-# *
-# *
-# *
-# *
+# * @param PATH
 # */
-# function bib.crit() {
-# }
+function bib.dirname() {
+    (( ${#} == 1 )) || return ${BIB_E_ARG}
+
+    local _path="${1}"
+    local _dirname
+    local -i _path_is_absolute=${BIB_FALSE}
+    local _basename
+    local -i _basename_length
+    local -i _status_extglob=${BIB_E_NOK}
+
+    [[ "${_path:0:1}" == "/" ]] && _path_is_absolute=${BIB_TRUE}
+
+    shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
+    bib.ok ${_status_extglob} || shopt -s extglob
+
+    if [[ "${_path}" =~ ^[/]+$ ]]
+    then
+        _dirname="/"
+    else
+        _path="${_path##+(/)}"
+        _path="${_path%%+(/)}"
+        _basename=$(bib.basename "${_path}")
+        _basename_length=${#_basename}
+
+        _dirname="${_path:0: $(( -${_basename_length} ))}"
+    fi
+
+    if [[ "${_dirname}" != "/" ]]
+    then
+        _dirname="${_dirname%%+(/)}"
+        (( _path_is_absolute )) && _dirname="/${_dirname}"
+    fi
+
+    bib.ok ${_status_extglob} && shopt -u extglob
+
+    printf "${_dirname}"
+
+    return ${BIB_E_OK}
+}
 
 
 #/**
@@ -589,22 +625,6 @@ function bib.not() {
     local -i _boolean_value=${1}
     printf "$(( ~ _boolean_value & 1 ))"
 }
-
-
-#/**
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# */
-# function bib.notice() {
-# }
 
 
 #/**
@@ -825,22 +845,6 @@ function bib.version() {
 
     printf "${_return_string}"
 }
-
-
-#/**
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# *
-# */
-# function bib.warn() {
-# }
 
 
 ########################################
