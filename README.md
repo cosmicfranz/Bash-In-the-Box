@@ -80,6 +80,8 @@ Compared to the last line of the previous code, it is much less readable, and re
 * For now it is Bash specific
 * developed and tested only on Linux
 * not caring of POSIX compliance
+* no SELinux support
+* anything else that I possibly may not even be aware of...
 
 ## Installation
 
