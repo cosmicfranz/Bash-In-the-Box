@@ -89,7 +89,7 @@ As said before, Bash-In-the-Box does not require installation: the entire librar
 
 However it can be used as a system-wide library, by just copying it into some directory and setting the `BIB_HOME` environment variable to its path. As long as `BIB_HOME` is correctly set, the following code can be safely used:
 
-    source ${BIB_HOME}/main.lib.sh
+    source ${BIB_HOME}/bitbox/main.lib.sh
 
 ## Abbreviations
 

@@ -1,21 +1,20 @@
-## Bash-In-The-Box (BItBox)
+## Bash-In-The-Box (BitBox)
 ## Copyright © 2023 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-The-Box”.
 ##
-## “Bash-In-The-Box” is free software: you can redistribute it
-## and/or modify it under the terms of the GNU General Public License as
-## published by the Free Software Foundation, either version 3 of the
-## License, or (at your option) any later version.
+## “Bash-In-The-Box” is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by the
+## Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 ##
-## “Bash-In-The-Box” is distributed in the hope that it will be
-## useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-## Public License for more details.
+## “Bash-In-The-Box” is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+## more details.
 ##
-## You should have received a copy of the GNU General Public License along
-## with “Bash-In-The-Box”. If not, see
-## <https://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## “Bash-In-The-Box”. If not, see <https://www.gnu.org/licenses/>.
 
 
 ########################################
@@ -358,9 +357,9 @@ readonly BIB_SCRIPT_VERSION="${BIB_CONFIG["version"]}"
 # *
 # * It is usually set as an environment variable.
 # *
-# * Default value: “bitbox” directory under the script path
+# * Default value: SCRIPT_BASEDIR
 # */
-: ${BIB_HOME:="${BIB_SCRIPT_BASEDIR}/${BIB_NAME,,}"}
+: ${BIB_HOME:="${BIB_SCRIPT_BASEDIR}"}
 
 
 #/**
@@ -542,8 +541,8 @@ function bib.dirname() {
 # *
 # * LIB_NAME is the name of the library itself (not the file name).
 # *
-# * If the plain name is passed, a file named <LIB_NAME>.lib.sh in BIB_HOME
-# * path will be searched.
+# * If the plain name is passed, a file named <LIB_NAME>.lib.sh in
+# * BIB_HOME/bitbox path will be searched.
 # *
 # * If name is preceded by a period (.<LIB_NAME>), the matching file name is
 # * expected to be in BIB_SCRIPT_BASEDIR.
@@ -567,7 +566,7 @@ function bib.dirname() {
 function bib.include() {
     local _lib_name="${1}"
     local _lib_filename="${_lib_name}"
-    local _lib_path="${BIB_HOME}"
+    local _lib_path="${BIB_HOME}/${BIB_NAME,,}"
 
     [[ -z "${_lib_name}" ]] && return ${BIB_E_ARG}
 
