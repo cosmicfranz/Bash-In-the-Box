@@ -1,5 +1,3 @@
-#!/bin/bash
-
 declare -A conf=(
     ["interactive"]=1
     ["name"]="main_lib_test"
@@ -13,8 +11,6 @@ source ${BIB_HOME}/bitbox/main.lib.sh conf
 
 bib.include unittest.unittest
 
-
-declare -i status=${BIB_E_OK}
 
 bib_unittest_tests=(
     ["basename"]=1
@@ -152,7 +148,7 @@ function test_print() {
         'come stai?'
     )
 
-    local _risultato=$(bib.print -v _vari "Ciao %s, %s %s\n" "Spero bene.")
+    local _risultato=$(bib.print -d 1 -v _vari "Ciao %s, %s %s\n" "Spero bene.")
 
     bib.unittest.assert eq "${_risultato}" "Ciao Francesco, come stai? Spero bene."
 }
@@ -188,13 +184,3 @@ function test_version() {
 
     return ${_status}
 }
-
-
-########################################
-
-
-bib.unittest.run ${@} || status=${BIB_E_NOK}
-bib.print -n "\n"
-bib.unittest.stats
-
-exit ${status}
