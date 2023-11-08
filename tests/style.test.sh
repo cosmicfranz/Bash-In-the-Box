@@ -1,5 +1,3 @@
-#!/bin/bash
-
 declare -A conf=(
     ["interactive"]=1
     ["style"]=1
@@ -10,8 +8,6 @@ source ${BIB_HOME}/bitbox/main.lib.sh conf
 
 bib.include unittest.unittest
 
-
-declare -i status=${BIB_E_OK}
 
 bib_unittest_tests=(
     ["style"]=1
@@ -45,13 +41,3 @@ function test_style() {
 
     return ${_status}
 }
-
-
-########################################
-
-
-bib.unittest.run ${@} || status=${BIB_E_NOK}
-bib.print "\n"
-bib.unittest.stats
-
-exit ${status}

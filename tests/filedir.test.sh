@@ -1,5 +1,3 @@
-#!/bin/bash
-
 declare -A conf=(
     ["filedir.enable_bc"]=1
     ["interactive"]=1
@@ -13,9 +11,6 @@ declare -A conf=(
 source ${BIB_HOME}/bitbox/main.lib.sh conf
 bib.include filedir
 bib.include unittest.unittest
-
-
-declare -i status=${BIB_E_OK}
 
 bib_unittest_tests=(
     ["create_dir"]=1
@@ -145,15 +140,3 @@ function test_size() {
 
     return ${_status}
 }
-
-
-########################################
-
-
-setup
-bib.unittest.run "${@}" || status=${BIB_E_NOK}
-teardown
-bib.print -n "\n"
-bib.unittest.stats
-
-exit ${status}
