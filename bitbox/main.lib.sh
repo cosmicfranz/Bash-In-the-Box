@@ -83,7 +83,7 @@ readonly BIB_REL_TYPE="dev"
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20231019"
+readonly BIB_REL_DATE="20231109"
 
 
 ## BOOLEAN CONSTANTS
@@ -454,7 +454,7 @@ declare -i BIB_STDOUT=1
 # *
 # * Default value: 2
 # */
-declare -i BIB_STDOUT=2
+declare -i BIB_STDERR=2
 
 
 #/**
