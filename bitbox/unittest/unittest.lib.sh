@@ -120,6 +120,18 @@ declare -gA bib_unittest_results
 ## FUNCTIONS ##
 ###############
 
+#/**
+# * NO-OP STUB
+# */
+function setup() { : ; }
+
+
+#/**
+# * NO-OP STUB
+# */
+function teardown() { : ; }
+
+
 function bib.unittest.run() {
     local _args=${@:-${!bib_unittest_tests[@]}}
     local -a _tests=()

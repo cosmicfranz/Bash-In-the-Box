@@ -83,7 +83,7 @@ readonly BIB_REL_TYPE="dev"
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20231019"
+readonly BIB_REL_DATE="20231109"
 
 
 ## BOOLEAN CONSTANTS
@@ -220,6 +220,26 @@ readonly BIB_E_ACCESS=25
 # * Default value: 255
 # */
 readonly BIB_E_INT=255
+
+
+## CONSOLE I/O STREAMS
+## The following constants contain the alternative file descriptors for
+## standard output and standard error.
+
+#/**
+# * Alternative file descriptor for standard output.
+# *
+# * Default value: 3
+# */
+readonly BIB_STDOUT_ALT=3
+
+
+#/**
+# * Alternative file descriptor for standard error.
+# *
+# * Default value: 4
+# */
+readonly BIB_STDERR_ALT=4
 
 
 ####################
@@ -396,6 +416,45 @@ declare BIB_INTERACTIVE=${BIB_TRUE}
 # * Default value: BIB_FALSE
 # */
 declare BIB_DEBUG=${BIB_FALSE}
+
+
+#/**
+# * Toggles redirections.
+# *
+# * When set to BIB_TRUE, standard output and standard error streams are
+# * diverted in the following way: first of all, they are “saved” in.
+# *
+# * This flag is honored by “log” library: if set to BIB_TRUE, all messages
+# * down to DEBUG level are shown, unless specific configuration is given in
+# * order to change this behavior. Please read “log” documentation for details.
+# *
+# * Default value: BIB_FALSE
+# */
+declare BIB_REDIRECT=${BIB_FALSE}
+
+
+#/**
+# * Current file descriptor of the standard input.
+# *
+# * Default value: 0
+# */
+declare -i BIB_STDIN=0
+
+
+#/**
+# * Current file descriptor of the standard output.
+# *
+# * Default value: 1
+# */
+declare -i BIB_STDOUT=1
+
+
+#/**
+# * Current file descriptor of the standard error.
+# *
+# * Default value: 2
+# */
+declare -i BIB_STDERR=2
 
 
 #/**
@@ -681,7 +740,7 @@ function bib.print() {
     (( ${BIB_INTERACTIVE} )) || return ${BIB_E_OK}
 
     local _format
-    local -i _fd=1
+    local -i _fd=${BIB_STDOUT}
     local -i _no_style=${BIB_FALSE}
     local -n _variables
 
@@ -695,7 +754,7 @@ function bib.print() {
             ;;
 
             "e" )
-                _fd=2
+                _fd=${BIB_STDERR}
             ;;
 
             "n" )
@@ -715,6 +774,17 @@ function bib.print() {
     shift
 
     printf "${_format}" "${_variables[@]}" "${@}" >&${_fd}
+}
+
+
+#/**
+# * Redirects standard output and standard error streams.
+# */
+function _bib.redirect() {
+    eval "exec ${BIB_STDOUT}>&1 ${BIB_STDERR}>&2 1>&- 2>&-"
+    BIB_REDIRECT=${BIB_TRUE}
+    BIB_STDOUT=${BIB_STDOUT_ALT}
+    BIB_STDERR=${BIB_STDERR_ALT}
 }
 
 
@@ -853,3 +923,4 @@ function bib.version() {
 
 (( BIB_INTERACTIVE )) && (( BIB_CONFIG["style"] )) && bib.include _style
 (( BIB_CONFIG["assert"] )) && bib.include _assert
+(( BIB_CONFIG["redirect"] )) && _bib.redirect
