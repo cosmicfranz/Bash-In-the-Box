@@ -5,12 +5,14 @@ declare -a tests=(
     "main"
     "style"
     "filedir"
+    "array"
 )
 
 declare -A tests_enabled=(
     ["main"]=1
     ["style"]=1
     ["filedir"]=1
+    ["array"]=1
 )
 
 declare -A tests_results
@@ -82,7 +84,7 @@ do
     if (( tests_enabled["${test}"] ))
     then
         bib.print "Testing “${test}”\n"
-#         set -x
+
         run_test "${test}"
         case ${?} in
             ${BIB_E_NEXISTS} )
@@ -99,7 +101,7 @@ do
                 bib.print "&GRN*Test “${test}” OK*\n"
             ;;
         esac
-#         set +x
+
     else
         bib.print "*Test “${test}” skipped*\n"
     fi
