@@ -1,20 +1,20 @@
-## Bash-In-The-Box (BItBox)
+## Bash-In-the-Box (BItBox)
 ## Copyright © 2023 Francesco Napoleoni
 ##
-## This file is part of “Bash-In-The-Box”.
+## This file is part of “Bash-In-the-Box”.
 ##
-## “Bash-In-The-Box” is free software: you can redistribute it and/or modify
+## “Bash-In-the-Box” is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by the
 ## Free Software Foundation, either version 3 of the License, or (at your
 ## option) any later version.
 ##
-## “Bash-In-The-Box” is distributed in the hope that it will be useful, but
+## “Bash-In-the-Box” is distributed in the hope that it will be useful, but
 ## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 ## or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 ## more details.
 ##
 ## You should have received a copy of the GNU General Public License along with
-## “Bash-In-The-Box”. If not, see <https://www.gnu.org/licenses/>.
+## “Bash-In-the-Box”. If not, see <https://www.gnu.org/licenses/>.
 
 
 ########################################
@@ -81,16 +81,82 @@ function bib.array.contains() {
 # *
 # * This function is just syntactic sugar for bib.array.filter().
 # *
-# * Sintassi: bib.array.copy SOURCE DESTINATION
+# * Syntax: bib.array.copy SOURCE DESTINATION
 # *
-# * @param SOURCE il nome dell’array da copiare
-# * @param DESTINATION il nome dell’array su cui sarà copiato il
-# *                     contenuto dell’array SOURCE
+# * @param SOURCE the name of the array to be copied
+# * @param DESTINATION the name of the resulting array. Any previous contents
+# *                    will be cleared
 # */
 function bib.array.copy() {
     (( ${#} == 2 )) || return ${BIB_E_ARG}
 
     bib.array.filter ${1} ${2}
+}
+
+
+#/**
+# * Tests two arrays for equality.
+# *
+# * Two arrays are intended equal if and only if all the following conditions
+# * are true:
+# * * they have the same cardinality (the same number of elements)
+# * * for each key-value pair (k1, v1) in the first array, there must be one
+# *   and only one pair (k2, v2) in the second array such that k1 = k2 and
+# *   v1 = v2
+# *
+# * Syntax: bib.array.equal ARRAY1 ARRAY2
+# *
+# * @param ARRAY1
+# * @param ARRAY2
+# *
+# * Exit codes:
+# * * BIB_E_OK if the two arrays are equal
+# * * BIB_E_NOK otherwise
+# * * BIB_E_ARG if the number of passed arguments is not 2
+# */
+function bib.array.equal() {
+    (( ${#} == 2 )) || return ${BIB_E_ARG}
+    [[ "${1}" == "${2}" ]] && return ${BIB_E_OK}
+
+    local -i _status=${BIB_E_OK}
+    local -n _array1="${1}"
+    local -n _array2="${2}"
+    local _key
+
+    if (( ${#_array1[@]} == ${#_array2[@]} ))
+    then
+        for _key in ${!_array1[@]}
+        do
+            if [[ "${_array1["${_key}"]}" != "${_array2["${_key}"]}" ]]
+            then
+                _status=${BIB_E_NOK}
+                break
+            fi
+        done
+    else
+        _status=${BIB_E_NOK}
+    fi
+
+    return ${_status}
+}
+
+
+#/**
+# * Checks if a key or index is defined in an array.
+# *
+# * Returns BIB_E_OK if the key or index is set, BIB_E_NOK otherwise.
+# *
+# * Syntax: bib.array.exists ARRAY KEY_OR_INDEX
+# *
+# * @param ARRAY the array to test
+# * @param KEY_OR_INDEX the key to find
+# * @return BIB_E_OK if KEY_OR_INDEX is set, BIB_E_NOK otherwise
+# */
+function bib.array.exists() {
+    local -n _array="${1}"
+    local _key_or_index="${2}"
+
+    [[ -v _array["${_key_or_index}"] ]]
 }
 
 
@@ -123,7 +189,7 @@ function bib.array.copy() {
 # *
 # * Options:
 # *
-# * -f FILTER : a named reference to a filter array
+# * -f FILTER : a nameref of a filter array
 # * -r : reverse the filter: only elements that match will be copied
 # * -v : the filter contains values, rather than keys (or indexes)
 # *
@@ -182,7 +248,7 @@ function bib.array.filter() {
                 done
             done
         else
-            for _key in ${_filter_array[@]}
+            for _key in "${_filter_array[@]}"
             do
                 [[ -v _source["${_key}"] ]] && _filter["${_key}"]=0
             done
