@@ -83,7 +83,7 @@ readonly BIB_REL_TYPE="dev"
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20231109"
+readonly BIB_REL_DATE="20231112"
 
 
 ## BOOLEAN CONSTANTS
@@ -116,6 +116,23 @@ readonly BIB_FALSE=0
 ## It is important to note that exit codes alone do not carry enough information
 ## about the state of the execution, and should be accompanied by printed
 ## messages or sensible logging whenever possible.
+
+#/**
+# * Printable strings matching numeric codes.
+# */
+readonly -a BIB_E_CODES=(
+    [0]="OK"
+    [1]="NOK"
+    [2]="ARG"
+    [3]="NPERM"
+    [8]="TYPE"
+    [9]="VALUE"
+    [16]="STATE"
+    [24]="NEXISTS"
+    [25]="ACCESS"
+    [255]="INT"
+)
+
 
 #/**
 # * Represents “successful execution” state.
