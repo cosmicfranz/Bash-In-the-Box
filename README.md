@@ -1,6 +1,6 @@
 # Bash-In-the-Box
 
-*October 2023*
+*November 2023*
 
 ## Introduction
 
@@ -13,6 +13,7 @@ In order to obtain such simplicity, this framework has been thought with a few r
 * **usefulness and modularity**: include only code that is really needed
 * the code has to be **pure Bash**, as much as possible, thus reducing dependencies on external software
 * at the same time, good coding practices and readability must be encouraged
+* **integration**: developers just have to include Bash-In-the-Box to obtain a (sort of) standard library, logging, configuration, unit testing and other useful tools; no additional downloads, consistent workflow, no unnecessary dependencies
 
 Quite ambitious goals, huh? Well, first of all, let’s say that I’m no Bash guru, just a user who does much scripting for his own needs, and would like to avoid code repetitions and maintainability woes. Moreover, in order to unleash many interesting but obscure Bash features, I seek clearer syntax and ease of use.
 
