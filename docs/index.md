@@ -51,7 +51,7 @@ In this case, the calling script will contain this line:
 
 Once again, BItBox can work without requiring any preparation. The choice is up to the user.
 
-Indeed, such choice depends on the use case: if a script is to be run in a small system, `bitbox` directory — or even parts of it — can be bundled with it. Conversely, if wider access to the various BItBox functionalities is needed, the whole package can be installed.
+Indeed, such choice depends on the use case: if a script is to be run in a small system, `bitbox` directory — or even parts of it — can be bundled with it. Conversely, if wider access to the various BItBox functionalities is needed, the whole package can be installed as well.
 
 So, a bit of planning is needed in order to figure out which option is best.
 
@@ -61,7 +61,7 @@ Thus, to simplify installation, an optional Makefile is provided to do the follo
 
 * copy the libraries in an appropriate location
 * ensure that `BIB_HOME` environment variable is always correctly set before use
-* additional tools (like `run_tests.sh`) are installed as well
+* additional tools (like `run_tests.sh`) are installed
 * optional testing of the whole library (the typical `make test`)
 
-This way, BItBox can be easily packaged as RPM, DEB or other format.
+This way, BItBox can also be easily packaged as RPM, DEB or other format.
