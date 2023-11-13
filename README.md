@@ -10,6 +10,7 @@ In order to obtain such simplicity, this framework has been thought with a few r
 
 * zero step, **drop-in installation**; it must work *out of the box*
 * **unobtrusiveness**, that is, shallow learning curve, no imposition on coding style, no gobbledygook syntax (or, at least, not worse than plain Bash syntax), gradual introduction of features
+* **small code base**
 * **usefulness and modularity**: include only code that is really needed
 * the code has to be **pure Bash**, as much as possible, thus reducing dependencies on external software
 * at the same time, good coding practices and readability must be encouraged
