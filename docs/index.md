@@ -53,6 +53,15 @@ Once again, BItBox can work without requiring any preparation. The choice is up 
 
 Indeed, such choice depends on the use case: if a script is to be run in a small system, `bitbox` directory — or even parts of it — can be bundled with it. Conversely, if wider access to the various BItBox functionalities is needed, the whole package can be installed.
 
-Optionally `run_tests.sh` script can be copied to or linked in `/usr/local/bin` if running unit tests is needed.
+So, a bit of planning is needed in order to figure out which option is best.
 
-Anyway, a simple Makefile is provided to do all of these operations without hassles, neither for the user, nor for the packager.
+If additional features are desired, manual operation is required: for example, if unit testing is used, `run_tests.sh` script has to be copied to or linked in `/usr/local/bin` (or other location).
+
+Thus, to simplify installation, an optional Makefile is provided to do the following operations:
+
+* copy the libraries in an appropriate location
+* ensure that `BIB_HOME` environment variable is always correctly set before use
+* additional tools (like `run_tests.sh`) are installed as well
+* optional testing of the whole library (the typical `make test`)
+
+This way, BItBox can be easily packaged as RPM, DEB or other format.
