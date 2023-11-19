@@ -123,14 +123,19 @@ readonly BIB_FALSE=0
 readonly -a BIB_E_CODES=(
     [0]="OK"
     [1]="NOK"
-    [2]="ARG"
+    [2]="USAGE"
     [3]="NPERM"
-    [8]="TYPE"
-    [9]="VALUE"
-    [16]="STATE"
-    [24]="NEXISTS"
-    [25]="ACCESS"
-    [255]="INT"
+    [4]="ARG"
+    [5]="TYPE"
+    [6]="VALUE"
+    [7]="STATE"
+    [8]="NEXISTS"
+    [9]="ACCESS"
+    [16]="ASSERTION"
+    [17]="TESTFAIL"
+    [18]="TESTSKIP"
+    [24]="CONF_SYNTAX"
+    [25]="CONF_LINE"
 )
 
 
@@ -155,14 +160,11 @@ readonly BIB_E_NOK=1
 
 
 #/**
-# * Wrong or insufficient arguments.
-# *
-# * This code can be returned by a script or a function when called with an
-# * unexpected number or type of arguments.
+# * Represents incorrect usage of a function or pipeline.
 # *
 # * Default value: 2
 # */
-readonly BIB_E_ARG=2
+readonly BIB_E_USAGE=2
 
 
 #/**
@@ -176,14 +178,25 @@ readonly BIB_E_NPERM=3
 
 
 #/**
+# * Wrong or insufficient arguments.
+# *
+# * This code can be returned by a script or a function when called with an
+# * unexpected number or type of arguments.
+# *
+# * Default value: 4
+# */
+readonly BIB_E_ARG=4
+
+
+#/**
 # * Data type error.
 # *
 # * Typically returned when an object contains uninitialized or inconsistent
 # * data. More details about objects are found in the documentation.
 # *
-# * Default value: 8
+# * Default value: 5
 # */
-readonly BIB_E_TYPE=8
+readonly BIB_E_TYPE=5
 
 
 #/**
@@ -192,9 +205,9 @@ readonly BIB_E_TYPE=8
 # * Can be returned when a function argument or an object contains a value not
 # * allowed.
 # *
-# * Default value: 9
+# * Default value: 6
 # */
-readonly BIB_E_VALUE=9
+readonly BIB_E_VALUE=6
 
 
 #/**
@@ -204,9 +217,9 @@ readonly BIB_E_VALUE=9
 # * when such function is part of a specific API and expects that an object has
 # * been correctly initialized before.
 # *
-# * Default value: 16
+# * Default value: 7
 # */
-readonly BIB_E_STATE=16
+readonly BIB_E_STATE=7
 
 
 #/**
@@ -214,9 +227,9 @@ readonly BIB_E_STATE=16
 # *
 # * Returned when a path in the filesystem does not exists or is inaccessible.
 # *
-# * Default value: 24
+# * Default value: 8
 # */
-readonly BIB_E_NEXISTS=24
+readonly BIB_E_NEXISTS=8
 
 
 #/**
@@ -224,19 +237,9 @@ readonly BIB_E_NEXISTS=24
 # *
 # * If a path is reachable but not readable, writable or executable.
 # *
-# * Default value: 25
+# * Default value: 9
 # */
-readonly BIB_E_ACCESS=25
-
-
-#/**
-# * User interruption requested.
-# *
-# * Must be returned when SIGINT is trapped.
-# *
-# * Default value: 255
-# */
-readonly BIB_E_INT=255
+readonly BIB_E_ACCESS=9
 
 
 ## CONSOLE I/O STREAMS

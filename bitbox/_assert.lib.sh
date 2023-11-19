@@ -70,9 +70,9 @@ readonly -A BIB_ASSERT_PREDICATES_EXPECTED=(
 #/**
 # * Assertion failed exit code.
 # *
-# * Default value: 17
+# * Default value: 16
 # */
-readonly BIB_E_ASSERTION=17
+readonly BIB_E_ASSERTION=16
 
 
 ########################################

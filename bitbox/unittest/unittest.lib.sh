@@ -39,17 +39,17 @@ bib.include _assert
 #/**
 # * Test failed.
 # *
-# * Default value: 18
+# * Default value: 17
 # */
-readonly BIB_E_TESTFAIL=18
+readonly BIB_E_TESTFAIL=17
 
 
 #/**
 # * Test skipped.
 # *
-# * Default value: 19
+# * Default value: 18
 # */
-readonly BIB_E_TESTSKIP=19
+readonly BIB_E_TESTSKIP=18
 
 
 ########################################
