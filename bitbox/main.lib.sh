@@ -134,8 +134,9 @@ readonly -a BIB_E_CODES=(
     [16]="ASSERTION"
     [17]="TESTFAIL"
     [18]="TESTSKIP"
-    [24]="CONF_SYNTAX"
-    [25]="CONF_LINE"
+    [24]="CFG_SYNTAX"
+    [25]="CFG_LINE"
+    [26]="CFG_KEY"
 )
 
 
