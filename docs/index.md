@@ -1,6 +1,10 @@
 # Bash-In-the-Box documentation
 
 
+## Documents
+* [Bash-In-the-Box man page](Bash-In-the-Box.7.md)
+
+
 ## Introduction
 
 Bash-In-the-Box is a framework for Bash >= 5 aimed at *simplifying* code creation and organization.
@@ -22,31 +26,6 @@ That said, let’s see what I have done so far to achieve these goals:
 * looking at the documentation and inside the code, the developer can find out which coding style is suggested (but, again, not imposed)
 
 
-## How to use Bash-In-the-Box
-
-First and foremost, a rapid look at BItBox package reveals this directory structure:
-
-```
-Bash-In-the-Box
-├── bitbox
-├── docs
-├── run_tests.sh
-└── tests
-```
-
-The relevant directory here is `bitbox`, which contains the actual code.
-
-This directory alone can be copied into the location that contains the calling script; at this point it can be enabled by inserting the following line into the calling script:
-
-    source ${PWD}/bitbox/main.lib.sh
-
-If a system-wide installation is desired, `BIB_HOME` environment variable must be defined and assigned the path to `Bash-In-the-Box`.
-
-In this case, the calling script will contain this line:
-
-    source ${BIB_HOME}/bitbox/main.lib.sh
-
-
 ### To install or *not* to install?
 
 Once again, BItBox can work without requiring any preparation. The choice is up to the user.
@@ -65,3 +44,4 @@ Thus, to simplify installation, an optional Makefile is provided to do the follo
 * optional testing of the whole library (the typical `make test`)
 
 This way, BItBox can also be easily packaged as RPM, DEB or other format.
+
