@@ -2,6 +2,9 @@
 
 
 ## Documents
+
+The creation of a comprehensive documentation is underway. For now, I suggest to look at the code, which is thoroughly documented, or use the man pages linked below.
+
 * [Bash-In-the-Box man page](Bash-In-the-Box.7.md)
 
 
