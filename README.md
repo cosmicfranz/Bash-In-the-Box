@@ -98,3 +98,7 @@ However it can be used as a system-wide library, by just copying it into some di
 * Bitbox
 * BItB
 * BIB
+
+## Documentation
+
+* [Bash-In-the-Box documentation index](docs/index.md)
