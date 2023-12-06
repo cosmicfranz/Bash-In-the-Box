@@ -131,6 +131,7 @@ readonly -a BIB_E_CODES=(
     [7]="STATE"
     [8]="NEXISTS"
     [9]="ACCESS"
+    [12]="LOG_CHANNEL"
     [16]="ASSERTION"
     [17]="TESTFAIL"
     [18]="TESTSKIP"
@@ -430,28 +431,26 @@ declare BIB_INTERACTIVE=${BIB_TRUE}
 # * Debug mode allows the user or the developer to see all the messages from
 # * the script printed on screen.
 # *
+# * Debug mode can be enabled using “debug” flag in the base configuration.
+# *
 # * This flag is honored by “log” library: if set to BIB_TRUE, all messages
 # * down to DEBUG level are shown, unless specific configuration is given in
 # * order to change this behavior. Please read “log” documentation for details.
 # *
-# * Default value: BIB_FALSE
+# * Default value: FALSE
 # */
-declare BIB_DEBUG=${BIB_FALSE}
+declare -i _BIB_DEBUG=${BIB_CONFIG["debug"]:-${BIB_FALSE}}
 
 
 #/**
 # * Toggles redirections.
 # *
-# * When set to BIB_TRUE, standard output and standard error streams are
-# * diverted in the following way: first of all, they are “saved” in.
+# * When set to TRUE, standard output and standard error streams are diverted
+# * in the following way: first of all, they are “saved” in.
 # *
-# * This flag is honored by “log” library: if set to BIB_TRUE, all messages
-# * down to DEBUG level are shown, unless specific configuration is given in
-# * order to change this behavior. Please read “log” documentation for details.
-# *
-# * Default value: BIB_FALSE
+# * Default value: FALSE
 # */
-declare BIB_REDIRECT=${BIB_FALSE}
+declare -i BIB_REDIRECT=${BIB_FALSE}
 
 
 #/**
