@@ -7,6 +7,7 @@ declare -a tests=(
     "filedir"
     "array"
     "cfg"
+    "log"
 )
 
 declare -A tests_enabled=(
@@ -15,6 +16,7 @@ declare -A tests_enabled=(
     ["filedir"]=1
     ["array"]=1
     ["cfg"]=1
+    ["log"]=1
 )
 
 declare -A tests_results
