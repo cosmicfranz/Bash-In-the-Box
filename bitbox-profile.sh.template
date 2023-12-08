@@ -1,0 +1,5 @@
+if [[ ! -v BIB_HOME ]]
+then
+    BIB_HOME="__BIB_HOME__"
+    export BIB_HOME
+fi
