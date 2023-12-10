@@ -1,7 +1,5 @@
 # Bash-In-the-Box
 
-*November 2023*
-
 ## Introduction
 
 A framework for Bash >= 5 aimed at *simplifying* code creation and organization. Indeed, *simplicity* is the keyword, but let me explain better.
