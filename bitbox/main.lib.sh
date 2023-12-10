@@ -307,9 +307,12 @@ readonly BIB_STDERR_ALT=4
 # * the fully qualified identifier for a key named “dir” in “log” library will
 # * be “log.dir”. Please refer to the appropriate documentation.
 # */
-declare -n BIB_CONFIG
-[[ -n "${1}" ]] && BIB_CONFIG="${1}"
-# readonly BIB_CONFIG
+declare -A BIB_CONFIG
+if [[ -n "${1}" && "${1}" != "-" ]]
+then
+    unset BIB_CONFIG
+    declare -n BIB_CONFIG="${1}"
+fi
 
 
 #/**

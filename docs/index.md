@@ -147,7 +147,7 @@ Then we edit the script to look like this:
 # The following line enables Bash-In-the-Box.
 # In this example we assume that the library is installed and BIB_HOME
 # environment variable is set accordingly.
-source ${BIB_HOME}/bitbox/main.lib.sh
+source ${BIB_HOME}/bitbox/main.lib.sh -
 
 # Now that BItB is enabled, library modules can be called with bib.include()
 # instead of “source” Bash builtin.

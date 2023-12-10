@@ -27,9 +27,11 @@ That said, let’s see what I have done so far to achieve these goals:
 ## Quickstart
 
 A plain “Hello world” script could be written like this:
-
-    source ${PWD}/bitbox/main.lib.sh
+```
+    source ${PWD}/bitbox/main.lib.sh -
     bib.print "Hello world!\n"
+```
+*Note the dash (“-”) at the end of the line, do not forget to include it.*
 
 The first line imports the “main” library, giving access to some basic functions, one of them being `bib.print()`, used on the second line. It is a wrapper of `printf` Bash builtin, extending a bit its functionality while retaining pretty much the same syntax.
 
@@ -39,7 +41,7 @@ Of course `echo` or `printf` could still be used to print text to screen, but us
 
 The following example prints two strings, the first to the standard output, the other to the standard error:
 
-    source ${PWD}/bitbox/main.lib.sh
+    source ${PWD}/bitbox/main.lib.sh -
     bib.print "Hello world!\n"
     bib.print -e "This goes to standard error\n"
 
@@ -89,7 +91,7 @@ As said before, Bash-In-the-Box does not require installation: the entire librar
 
 However it can be used as a system-wide library, by just copying it into some directory and setting the `BIB_HOME` environment variable to its path. As long as `BIB_HOME` is correctly set, the following code can be safely used:
 
-    source ${BIB_HOME}/bitbox/main.lib.sh
+    source ${BIB_HOME}/bitbox/main.lib.sh -
 
 ## Abbreviations
 
