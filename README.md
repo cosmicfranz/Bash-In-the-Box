@@ -81,15 +81,19 @@ Compared to the last line of the previous code, it is much less readable, and re
 * unit testing
 * functions for array manipulation
 * configuration through files
-* basic DB operations (currently support only for SQLite)
+<!-- * basic DB operations (currently support only for SQLite) -->
+
 
 ## Limitations
 
-* For now it is Bash specific
+* It is Bash specific
 * developed and tested only on Linux
 * not caring of POSIX compliance
 * no SELinux support
 * anything else that I possibly may not even be aware of...
+
+All in all, BItBox is still in its infancy, and many improvements and new features that I have in mind will be soon be done.
+
 
 ## Installation
 
