@@ -27,9 +27,9 @@ That said, let’s see what I have done so far to achieve these goals:
 ## Quickstart
 
 A plain “Hello world” script could be written like this:
-```
-    source ${PWD}/bitbox/main.lib.sh -
-    bib.print "Hello world!\n"
+```bash
+source ${PWD}/bitbox/main.lib.sh -
+bib.print "Hello world!\n"
 ```
 *Note the dash (“-”) at the end of the line, do not forget to include it.*
 
@@ -41,17 +41,21 @@ Of course `echo` or `printf` could still be used to print text to screen, but us
 
 The following example prints two strings, the first to the standard output, the other to the standard error:
 
-    source ${PWD}/bitbox/main.lib.sh -
-    bib.print "Hello world!\n"
-    bib.print -e "This goes to standard error\n"
+```bash
+source ${PWD}/bitbox/main.lib.sh -
+bib.print "Hello world!\n"
+bib.print -e "This goes to standard error\n"
+```
 
 OK, this may not make you jump on your chair. But enter the **configuration**:
 
-    declare -A conf=(
-        ["style"]=1
-    )
-    source ${PWD}/bitbox/main.lib.sh conf
-    bib.print -e "*Hello world*, with some /style/\n"
+```bash
+declare -A conf=(
+    ["style"]=1
+)
+source ${PWD}/bitbox/main.lib.sh conf
+bib.print -e "*Hello world*, with some /style/\n"
+```
 
 What’s happening here? An associative array is initialized with a *key-value* pair, the `style` flag, which enables colored text as well as font styles (bold, italic...).
 
@@ -63,7 +67,9 @@ printed on the standard error.
 
 To obtain the same effect using plain Bash, the script would look like this:
 
-    printf "\033[1mHello world\033[21m, with some \033[3mstyle\033[23m\n" >&2
+```bash
+printf "\033[1mHello world\033[21m, with some \033[3mstyle\033[23m\n" >&2
+```
 
 Compared to the last line of the previous code, it is much less readable, and requires remembering escape codes that modify the font style; moreover we have to fiddle with output redirection.
 
@@ -91,11 +97,13 @@ As said before, Bash-In-the-Box does not require installation: the entire librar
 
 However it can be used as a system-wide library, by just copying it into some directory and setting the `BIB_HOME` environment variable to its path. As long as `BIB_HOME` is correctly set, the following code can be safely used:
 
-    source ${BIB_HOME}/bitbox/main.lib.sh -
+```bash
+source ${BIB_HOME}/bitbox/main.lib.sh -
+```
 
 ## Abbreviations
 
-* Bitbox
+* BItBox
 * BItB
 * BIB
 
