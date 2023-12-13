@@ -3,6 +3,7 @@
 
 <details>
 <summary>Document index</summary>
+
 ## Documents
 
 > [!NOTE]
