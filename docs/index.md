@@ -1,11 +1,16 @@
 # Bash-In-the-Box documentation
 
 
+<details>
+<summary>Document index</summary>
 ## Documents
 
-The creation of a comprehensive documentation is underway. For now, I suggest to look at the code, which is thoroughly documented, or use the man pages linked below.
+> [!NOTE]
+> The creation of a comprehensive documentation is underway. For now, I suggest to look at the code, which is thoroughly documented, or use the man pages linked below.
 
+* [A non-trivial example](example-1.md)
 * [Bash-In-the-Box man page](Bash-In-the-Box.7.md)
+</details>
 
 
 ## Introduction
@@ -128,7 +133,7 @@ download_with_rsync fr2.rpmfind.net::linux/${path} /var/www/${path}
 
 So far so good, but what if we could avoid hard-coding the path and other metadata related to the repository we want to mirror?
 
-Bash-In-the-Box offers support for configuration files, which can be imported in a script as associative arrays. This allows us to write all the repository metadata outside the script. Here’s how:
+Bash-In-the-Box offers support for *configuration files*, which can be imported in a script as associative arrays. This allows us to write all the repository metadata outside the script. Here’s how:
 ```
 # file: rpmfusion_free.conf
 # RPMFusion Free repository for Linux Fedora 39 (x86_64)
