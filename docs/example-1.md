@@ -19,7 +19,7 @@
 Say that we want to mirror a remote site for use in our LAN.
 
 We already have our command written as follows:
-```
+```bash
 rsync -auvz --hard-links fr2.rpmfind.net::linux/rpmfusion/free/fedora/updates/39/x86_64 /var/www/rpmfusion/free/fedora/updates/39/x86_64
 ```
 that we run manually as needed or as a scheduled cron job.
@@ -27,14 +27,14 @@ that we run manually as needed or as a scheduled cron job.
 This command indeed does its job, but is a bit inflexible, since it exactly downloads a specific remote directory but does not care about its contents nor it knows about sibling directories with similar contents for different version or architectures.
 
 OK, a couple of simple variables could solve the problem:
-```
+```bash
 version=39; path=rpmfusion/free/fedora/updates/${version}/x86_64; rsync -auvz --hard-links fr2.rpmfind.net::linux/${path} /var/www/${path}
 ```
 
 This is much better, in that the `rsync` command is now (almost) independent from the specific path.
 
 But, you see, this has become a simple script, that we could save into a file, called (duh!) `update_mirror`:
-```
+```bash
 #!/bin/bash
 
 version=39
@@ -55,7 +55,7 @@ But if you need to turn a script like this into something more powerful, Bash-In
 That said, let’s see how our script can be improved to become a powerful, reusable and maintainable tool.
 
 First of all, we realize that `rsync` is a very complex software with many options that affect its behavior, so we could wrap it into a function in order to simplify its interface and make it accept parameters.
-```
+```bash
 #!/bin/bash
 
 function download_with_rsync() {
@@ -106,7 +106,7 @@ destination = /var/www
 ```
 
 Then we edit the script to look like this:
-```
+```bash
 #!/bin/bash
 
 # The following line enables Bash-In-the-Box.
@@ -168,7 +168,7 @@ download_with_rsync \
 ```
 
 This version of the script is a bit more elegant, because it can be called with the following, more concise and easy to remember command line:
-```
+```bash
 $ ./update_mirror rpmfusion_free
 ```
 
