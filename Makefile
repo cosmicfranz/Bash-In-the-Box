@@ -97,6 +97,45 @@ $(PACKAGES_INSTALL_TARGETS) : install-pkg-% : install-main
 	echo "Package $*: done"
 
 
+# Install man pages
+PHONY += install-man
+SILENT += install-man
+# SUPPORTED_LOCALES := it
+install-man :
+	echo "Installing man pages..."
+	
+	install --directory \
+	    --mode 0755 \
+	    $(DESTDIR)$(MANDIR)/man7
+	install --mode 0644 \
+	    $(wildcard docs/*.7) \
+	    $(DESTDIR)$(MANDIR)/man7/
+	
+	echo "Done"
+
+
+# Install Bash profile initialization script
+PHONY += install-profile
+SILENT += install-profile
+install-profile :
+	echo "Installing Bash profile initialization script..."
+	
+	install --directory \
+	    --mode 0755 \
+	    $(DESTDIR)$(SYSCONFDIR)/profile.d
+	install --mode 0644 \
+	    $(PACKAGE_NAME).sh \
+	    $(DESTDIR)$(SYSCONFDIR)/profile.d/
+	
+	echo "Done"
+
+
+####################
+
+
+## UNINSTALL TARGETS
+
+
 # Uninstall all the libraries and the support files.
 PHONY += uninstall
 SILENT += uninstall
@@ -137,22 +176,6 @@ $(PACKAGES_UNINSTALL_TARGETS) : uninstall-pkg-% :
 	echo "Package $*: done"
 
 
-# Install Bash profile initialization script
-PHONY += install-profile
-SILENT += install-profile
-install-profile :
-	echo "Installing Bash profile initialization script..."
-	
-	install --directory \
-	    --mode 0755 \
-	    $(DESTDIR)$(SYSCONFDIR)/profile.d
-	install --mode 0644 \
-	    $(PACKAGE_NAME).sh \
-	    $(DESTDIR)$(SYSCONFDIR)/profile.d/
-	
-	echo "Done"
-
-
 # Uninstall Bash profile initialization script
 PHONY += uninstall-profile
 SILENT += uninstall-profile
@@ -160,23 +183,6 @@ uninstall-profile :
 	echo "Uninstalling Bash profile initialization script..."
 	
 	rm --force $(DESTDIR)$(SYSCONFDIR)/profile.d/$(PACKAGE_NAME).sh
-	
-	echo "Done"
-
-
-# Install man pages
-PHONY += install-man
-SILENT += install-man
-# SUPPORTED_LOCALES := it
-install-man :
-	echo "Installing man pages..."
-	
-	install --directory \
-	    --mode 0755 \
-	    $(DESTDIR)$(MANDIR)/man7
-	install --mode 0644 \
-	    $(wildcard docs/*.7) \
-	    $(DESTDIR)$(MANDIR)/man7/
 	
 	echo "Done"
 
@@ -190,6 +196,18 @@ uninstall-man :
 	rm --force $(DESTDIR)$(MANDIR)/man7/*.7
 	
 	echo "Done"
+
+
+####################
+
+
+## OTHER TARGETS
+
+# Run self-tests
+PHONY += test
+SILENT += test
+test :
+	BIB_HOME=${PWD} ./run_tests.sh
 
 
 # Finds and deletes all editor generated backup files
