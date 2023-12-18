@@ -204,9 +204,9 @@ uninstall-man :
 ## OTHER TARGETS
 
 # Run self-tests
-PHONY += test
-SILENT += test
-test :
+PHONY += check
+SILENT += check
+check :
 	BIB_HOME=${PWD} ./run_tests.sh
 
 
