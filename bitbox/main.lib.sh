@@ -654,7 +654,7 @@ function bib.include() {
 
     if [[ "${_lib_name:0:1}" == "/" ]]
     then
-        _lib_path=$(dirname "${_lib_filename}")
+        _lib_path=$(bib.dirname "${_lib_filename}")
     else
         if [[ "${_lib_name:0:1}" == "." ]]
         then
@@ -665,17 +665,17 @@ function bib.include() {
         if bib.contains "." "${_lib_filename}"
         then
             _lib_filename="${_lib_filename//.//}"
-            _lib_path+="/$(dirname "${_lib_filename}")"
+            _lib_path+="/$(bib.dirname "${_lib_filename}")"
         fi
     fi
 
-    _lib_filename=$(basename "${_lib_filename}")
+    _lib_filename=$(bib.basename "${_lib_filename}")
 
     _lib_filename="${_lib_filename}.lib.sh"
 
-    [ -f "${_lib_path}/${_lib_filename}" ] || return ${BIB_E_NEXISTS}
+    [[ -f "${_lib_path}/${_lib_filename}" ]] || return ${BIB_E_NEXISTS}
 
-    if [ -z "${_BIB_LIBS["${_lib_name}"]}" ]
+    if [[ -z "${_BIB_LIBS["${_lib_name}"]}" ]]
     then
         source ${_lib_path}/${_lib_filename}
 
