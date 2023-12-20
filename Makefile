@@ -15,6 +15,7 @@ include $(addsuffix /package.mk,$(PACKAGE_NAME)/$(PACKAGES))
 
 PACKAGES_INSTALL_TARGETS := $(addprefix install-pkg-,$(PACKAGES))
 PACKAGES_UNINSTALL_TARGETS := $(addprefix un,$(PACKAGES_INSTALL_TARGETS))
+SCRIPTS := $(wildcard sh/*)
 
 
 ####################
@@ -59,7 +60,7 @@ $(PACKAGE_NAME).sh : $(PACKAGE_NAME)-profile.sh.template
 # Install all the libraries and the support files.
 PHONY += install
 SILENT += install
-install : install-main install-packages install-profile install-man
+install : install-main install-packages install-profile install-man install-scripts
 
 
 # Install package “main”
@@ -74,6 +75,22 @@ install-main :
 	install --mode 0644 \
 	    $(LIBS_SOURCES[main]) \
 	    $(DESTDIR)$(DATADIR)/$(NAME)/$(PACKAGE_NAME)
+	
+	echo "Done"
+
+
+# Install executable scripts
+PHONY += install-scripts
+SILENT += install-scripts
+install-scripts :
+	echo "Installing executable scripts..."
+	
+	install --directory \
+	    --mode 0755 \
+	    $(DESTDIR)$(BINDIR)
+	ln --symbolic \
+	    --target-directory=$(DESTDIR)$(BINDIR) \
+	    $(DATADIR)/$(SCRIPTS)
 	
 	echo "Done"
 
@@ -139,7 +156,7 @@ install-profile :
 # Uninstall all the libraries and the support files.
 PHONY += uninstall
 SILENT += uninstall
-uninstall : uninstall-main uninstall-packages uninstall-profile uninstall-man
+uninstall : uninstall-main uninstall-packages uninstall-profile uninstall-man uninstall-scripts
 	-rmdir $(DESTDIR)$(DATADIR)/$(NAME)
 
 
@@ -156,6 +173,16 @@ uninstall-main : uninstall-packages
 	-rmdir $(DESTDIR)$(DATADIR)/$(NAME)/$(PACKAGE_NAME)
 	
 	echo "Done"
+
+
+# Uninstall executable scripts.
+PHONY += uninstall-scripts
+SILENT += uninstall-scripts
+uninstall-scripts :
+	for file_name in $(SCRIPTS); \
+	do \
+	    rm --force $(DESTDIR)$(BINDIR)/$$(basename $${file_name}); \
+	done
 
 
 # Uninstall all the packages
@@ -207,7 +234,7 @@ uninstall-man :
 PHONY += check
 SILENT += check
 check :
-	BIB_HOME=${PWD} ./run_tests.sh
+	BIB_HOME=${PWD} $(SRC_DIR)/sh/bib-testrunner
 
 
 # Finds and deletes all editor generated backup files
