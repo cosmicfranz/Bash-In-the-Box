@@ -96,7 +96,7 @@ install-scripts :
 	    $(DESTDIR)$(BINDIR)
 	ln --symbolic \
 	    --target-directory=$(DESTDIR)$(BINDIR) \
-	    $(DATADIR)/$(SCRIPTS)
+	    $(DATADIR)/$(NAME)/$(SCRIPTS)
 	
 	echo "Done"
 
