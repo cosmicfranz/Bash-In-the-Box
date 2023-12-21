@@ -87,6 +87,12 @@ install-scripts :
 	
 	install --directory \
 	    --mode 0755 \
+	    $(DESTDIR)$(DATADIR)/$(NAME)/sh
+	install --mode 0755 \
+	    $(SCRIPTS) \
+	    $(DESTDIR)$(DATADIR)/$(NAME)/sh
+	install --directory \
+	    --mode 0755 \
 	    $(DESTDIR)$(BINDIR)
 	ln --symbolic \
 	    --target-directory=$(DESTDIR)$(BINDIR) \
@@ -179,10 +185,16 @@ uninstall-main : uninstall-packages
 PHONY += uninstall-scripts
 SILENT += uninstall-scripts
 uninstall-scripts :
+	echo "Uninstalling executable scripts..."
+	
 	for file_name in $(SCRIPTS); \
 	do \
+	    rm --force $(DESTDIR)$(DATADIR)/$(NAME)/$${file_name} \
 	    rm --force $(DESTDIR)$(BINDIR)/$$(basename $${file_name}); \
 	done
+	-rmdir $(DESTDIR)$(DATADIR)/$(NAME)/sh
+	
+	echo "Done"
 
 
 # Uninstall all the packages
