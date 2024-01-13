@@ -1,5 +1,5 @@
 ## Bash-In-the-Box (BItBox)
-## Copyright © 2023 Francesco Napoleoni
+## Copyright © 2024 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-the-Box”.
 ##
@@ -77,13 +77,13 @@ readonly BIB_REL_MINOR="0"
 # * * “beta[0-9]+” : when a new feature is (almost) complete and stable
 # * * “rc[0-9]+” : release candidate. API is stable, only bugfix are allowed
 # */
-readonly BIB_REL_TYPE="alpha1"
+readonly BIB_REL_TYPE="alpha5"
 
 
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20231216"
+readonly BIB_REL_DATE="20240114"
 
 
 ## BOOLEAN CONSTANTS
@@ -109,9 +109,9 @@ readonly BIB_FALSE=0
 ## returned by scripts and functions.
 ##
 ## The following codes are allotted:
-## * 0 - 31 : reserved, while values between 64
-## * 32 - 247: free for use in custom scripts
-## * 248- 255 : reserved
+## * 0 - 31 : reserved
+## * 32 - 124: free for use in custom scripts
+## * 125- 255 : reserved
 ##
 ## It is important to note that exit codes alone do not carry enough information
 ## about the state of the execution, and should be accompanied by printed
@@ -713,7 +713,7 @@ function bib.not() {
 # *
 # * Useful to test a variable containing the exit code from a command.
 # *
-# * Syntax: bib.ok STATE
+# * Syntax: bib.ok STATUS
 # *
 # * @return BIB_E_OK if input argument equals to 0, BIB_E_NOK otherwise
 # */
