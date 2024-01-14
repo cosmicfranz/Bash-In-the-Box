@@ -16,7 +16,9 @@ bib_unittest_tests=(
     ["basename"]=1
     ["contains"]=1
     ["dirname"]=1
+    ["normalize"]=1
     ["print"]=1
+    ["relative"]=1
     ["shrink"]=1
     ["title"]=1
     ["today"]=1
@@ -142,6 +144,36 @@ function test_dirname() {
 }
 
 
+function test_normalize() {
+    local -i _status=${BIB_E_OK}
+    local -A _expected=(
+        ["aa/bb/cc.txt"]="aa/bb/cc.txt"
+        ["/aa/bb/cc.txt"]="/aa/bb/cc.txt"
+        ["//aa/bb/cc.txt"]="/aa/bb/cc.txt"
+        ["/aa/bb////cc.txt"]="/aa/bb/cc.txt"
+        ["/aa/bb"]="/aa/bb"
+        ["////aa//bb/"]="/aa/bb/"
+        ["//aa////bb//"]="/aa/bb/"
+        ["aa/bb///"]="aa/bb/"
+        ["/"]="/"
+        ["//"]="/"
+        ["///"]="/"
+    )
+    local _path
+
+    for _path in "${!_expected[@]}"
+    do
+        bib.unittest.assert \
+            -m "Test “${_path}”" \
+            eq  "${_expected["${_path}"]}" \
+                "$(bib.normalize "${_path}")" \
+            || _status=${BIB_E_TESTFAIL}
+    done
+
+    return ${_status}
+}
+
+
 function test_print() {
     local -a _vari=(
         "Francesco"
@@ -152,6 +184,37 @@ function test_print() {
 
     bib.unittest.assert eq "${_risultato}" "Ciao Francesco, come stai? Spero bene."
 }
+
+
+function test_relative() {
+    local -i _status=${BIB_E_OK}
+    local -A _expected=(
+        ["aa/bb/cc.txt"]="aa/bb/cc.txt"
+        ["/aa/bb/cc.txt"]="aa/bb/cc.txt"
+        ["//aa/bb/cc.txt"]="aa/bb/cc.txt"
+        ["/aa/bb////cc.txt"]="aa/bb////cc.txt"
+        ["/aa/bb"]="aa/bb"
+        ["////aa//bb/"]="aa//bb/"
+        ["//aa////bb//"]="aa////bb//"
+        ["aa/bb///"]="aa/bb///"
+        ["/"]="/"
+        ["//"]="/"
+        ["///"]="/"
+    )
+    local _path
+
+    for _path in "${!_expected[@]}"
+    do
+        bib.unittest.assert \
+            -m "Test “${_path}”" \
+            eq  "${_expected["${_path}"]}" \
+                "$(bib.relative "${_path}")" \
+            || _status=${BIB_E_TESTFAIL}
+    done
+
+    return ${_status}
+}
+
 
 function test_shrink() {
     bib.unittest.assert eq "$(bib.shrink " a    43  hrr     ")" "a 43 hrr"
