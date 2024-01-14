@@ -526,7 +526,7 @@ function bib.basename() {
     shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
     bib.ok ${_status_extglob} || shopt -s extglob
     _path="${_path%%+(/)}"
-    if [[ -z "$_path" ]]
+    if [[ -z "${_path}" ]]
     then
         printf "/"
     else
@@ -582,12 +582,12 @@ function bib.dirname() {
     local -i _basename_length
     local -i _status_extglob=${BIB_E_NOK}
 
-    [[ "${_path:0:1}" == "/" ]] && _path_is_absolute=${BIB_TRUE}
+    bib.is_absolute "${_path}" && _path_is_absolute=${BIB_TRUE}
 
     shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
     bib.ok ${_status_extglob} || shopt -s extglob
 
-    if [[ "${_path}" =~ ^[/]+$ ]]
+    if bib.is_root "${_path}"
     then
         _dirname="/"
     else
@@ -687,9 +687,55 @@ function bib.include() {
 
 
 #/**
+# * Checks if a given path starts with a slash.
+# *
+# * Syntax: bib.is_absolute PATH
+# *
+# * @return BIB_E_OK if path starts with a slash
+# */
+function bib.is_absolute() {
+    [[ "${1:0:1}" == "/" ]]
+}
+
+
+#/**
+# * Checks if path is root.
+# *
+# * Syntax: bib.is_root PATH
+# *
+# * @return BIB_E_OK if path is root
+# */
+function bib.is_root() {
+    [[ "${1}" =~ ^[/]+$ ]]
+}
+
+
+#/**
 # * NO-OP STUB
 # */
 function bib.log() { : ; }
+
+
+#/**
+# * Collapses any redundant slashes in a path.
+# *
+# * Syntax: bib.normalize PATH
+# */
+function bib.normalize() {
+    local _path="${1}"
+    local -i _status_extglob=${BIB_E_NOK}
+
+    if bib.is_root "${_path}"
+    then
+        printf "/"
+        return
+    fi
+
+    shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
+    bib.ok ${_status_extglob} || shopt -s extglob
+    printf "${_path//+(\/)//}"
+    bib.ok ${_status_extglob} && shopt -u extglob
+}
 
 
 #/**
@@ -808,6 +854,35 @@ function _bib.redirect() {
     BIB_REDIRECT=${BIB_TRUE}
     BIB_STDOUT=${BIB_STDOUT_ALT}
     BIB_STDERR=${BIB_STDERR_ALT}
+}
+
+
+#/**
+# * Turns an absolute path into a relative one by stripping leading slashes.
+# *
+# * If the path does not start with slash(es), it is returned unchanged.
+# *
+# * Syntax: bib.relative PATH
+# */
+function bib.relative() {
+    local _path="${1}"
+    local -i _status_extglob=${BIB_E_NOK}
+
+    if bib.is_root "${_path}"
+    then
+        printf "/"
+        return
+    fi
+
+    if ! bib.is_absolute "${_path}"
+    then
+        printf ${_path}
+    else
+        shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
+        bib.ok ${_status_extglob} || shopt -s extglob
+        printf "${_path/+(\/)/}"
+        bib.ok ${_status_extglob} && shopt -u extglob
+    fi
 }
 
 
