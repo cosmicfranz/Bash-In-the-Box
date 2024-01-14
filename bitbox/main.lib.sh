@@ -77,7 +77,7 @@ readonly BIB_REL_MINOR="0"
 # * * “beta[0-9]+” : when a new feature is (almost) complete and stable
 # * * “rc[0-9]+” : release candidate. API is stable, only bugfix are allowed
 # */
-readonly BIB_REL_TYPE="alpha5"
+readonly BIB_REL_TYPE="alpha6"
 
 
 #/**
