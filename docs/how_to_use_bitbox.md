@@ -37,7 +37,7 @@ Note the dash (“-”) at the end: it is a dummy argument that must be passed i
 When not passing a base configuration, it is always safe and advisable to use the dash.
 
 
-# ENVIRONMENT
+## Environment
 
 The only environment variable used by BItBox is `BIB_HOME`, which can be (optionally) set to the path where the package resides. For example, if BItBox has been unpacked into `/usr/local/Bash-In-the-Box`, to enable system-wide access to it, the following command has to be issued:
 
@@ -50,7 +50,7 @@ A script wanting to use BItBox should contain this line:
 If BItBox is embedded into the script directory, `BIB_HOME` can be left unset.
 
 
-# CONVENTIONS
+## Conventions
 
 BItBox is organized in libraries (or modules), each named `<module_name>.lib.sh`. A library provides related variables, constants and functions, collectively called *members*.
 
@@ -102,7 +102,7 @@ So we can have:
 :   their typical scope is function-level or (rarely) script-level; their name contains two starting underscores; they should be never declared as such unless really needed, and used only at the deepest levels of code. A name reference to a reserved variable must not be passed to a function.
 
 
-# RUN-TIME BASE CONFIGURATION
+## Run-time base configuration
 
 The behavior of the various components of BItBox can be influenced by setting appropriate global variables, called *base configuration variables*.
 
