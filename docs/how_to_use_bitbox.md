@@ -128,3 +128,8 @@ Currently `main` library exposes a number of base configuration variables, as sh
 | `redirect` | `BIB_REDIRECT` | *boolean (0 or 1)* | If set to 1 (true) redirects stdout and stderr for finer output control (currently untested) |
 
 Other libraries may expose their own configuration variables and related keys of the base configuration.
+
+
+<hr>
+
+[Back to main page](index.md)

@@ -10,6 +10,7 @@
 ## Documentation
 
 * [A non-trivial example](example-1.md)
+* [The main library, or how to use BItBox](how_to_use_bitbox.md)
 * [Bash-In-the-Box man page](Bash-In-the-Box.7.md)
 </details>
 
@@ -58,3 +59,5 @@ This way, BItBox can also be easily packaged as RPM, DEB or other format.
 ## OK, got it. What next?
 
 You may want to understand how BItBox works, so here is a [non-trivial example](example-1.md) to give you an idea.
+
+The next step is to dive into the documentation, starting with [The main library, or how to use BItBox](how_to_use_bitbox.md).

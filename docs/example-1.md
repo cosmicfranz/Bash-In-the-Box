@@ -10,6 +10,7 @@
 ## Documentation
 
 * [A non-trivial example](example-1.md)
+* [The main library, or how to use BItBox](how_to_use_bitbox.md)
 * [Bash-In-the-Box man page](Bash-In-the-Box.7.md)
 </details>
 
