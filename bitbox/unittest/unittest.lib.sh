@@ -219,7 +219,6 @@ function bib.unittest.stats() {
 # */
 function bib.unittest.assert() {
     local -i _status=${BIB_E_TESTFAIL}
-    local -i _status_extglob=${BIB_E_NOK}
     local _message
     local _predicate
     local _result="F"
@@ -247,9 +246,6 @@ function bib.unittest.assert() {
 
     [[ ${_verbose} == ${BIB_TRUE} && -n "${_message}" ]] && bib.print -n "${_message}\n"
 
-    shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
-    bib.ok ${_status_extglob} || shopt -s extglob
-
     if bib.assert -n "${_predicate}" "${@}"
     then
         _result="."
@@ -264,7 +260,6 @@ function bib.unittest.assert() {
         then
             local -a _values
             [[ "${_predicate}" == ?(n)"eq" ]] && _values=( "${1}" "${2}" ) || _values=( "${BIB_ASSERT_PREDICATES_EXPECTED["${_predicate}"]}" "${1}" )
-            bib.ok ${_status_extglob} && shopt -u extglob
             bib.print -n -v _values "Test failed: expected: “%s”, got “%s”\n"
         else
             bib.print -n "OK\n"
