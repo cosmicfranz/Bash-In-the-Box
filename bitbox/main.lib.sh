@@ -457,6 +457,12 @@ declare -i BIB_REDIRECT=${BIB_FALSE}
 
 
 #/**
+# * Used by bib.shopt() to track the initial option values.
+# */
+declare -A _BIB_SHOPT_STATE
+
+
+#/**
 # * Current file descriptor of the standard input.
 # *
 # * Default value: 0
@@ -521,10 +527,7 @@ function bib.basename() {
     (( ${#} == 1 )) || return ${BIB_E_ARG}
 
     local _path="${1}"
-    local -i _status_extglob=${BIB_E_NOK}
 
-    shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
-    bib.ok ${_status_extglob} || shopt -s extglob
     _path="${_path%%+(/)}"
     if [[ -z "${_path}" ]]
     then
@@ -532,8 +535,6 @@ function bib.basename() {
     else
         printf "${_path##*/}"
     fi
-
-    bib.ok ${_status_extglob} && shopt -u extglob
 }
 
 
@@ -580,12 +581,8 @@ function bib.dirname() {
     local -i _path_is_absolute=${BIB_FALSE}
     local _basename
     local -i _basename_length
-    local -i _status_extglob=${BIB_E_NOK}
 
     bib.is_absolute "${_path}" && _path_is_absolute=${BIB_TRUE}
-
-    shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
-    bib.ok ${_status_extglob} || shopt -s extglob
 
     if bib.is_root "${_path}"
     then
@@ -604,8 +601,6 @@ function bib.dirname() {
         _dirname="${_dirname%%+(/)}"
         (( _path_is_absolute )) && _dirname="/${_dirname}"
     fi
-
-    bib.ok ${_status_extglob} && shopt -u extglob
 
     printf "${_dirname}"
 
@@ -723,7 +718,6 @@ function bib.log() { : ; }
 # */
 function bib.normalize() {
     local _path="${1}"
-    local -i _status_extglob=${BIB_E_NOK}
 
     if bib.is_root "${_path}"
     then
@@ -731,10 +725,7 @@ function bib.normalize() {
         return
     fi
 
-    shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
-    bib.ok ${_status_extglob} || shopt -s extglob
     printf "${_path//+(\/)//}"
-    bib.ok ${_status_extglob} && shopt -u extglob
 }
 
 
@@ -866,7 +857,6 @@ function _bib.redirect() {
 # */
 function bib.relative() {
     local _path="${1}"
-    local -i _status_extglob=${BIB_E_NOK}
 
     if bib.is_root "${_path}"
     then
@@ -878,10 +868,7 @@ function bib.relative() {
     then
         printf ${_path}
     else
-        shopt extglob &> /dev/null && _status_extglob=${BIB_E_OK}
-        bib.ok ${_status_extglob} || shopt -s extglob
         printf "${_path/+(\/)/}"
-        bib.ok ${_status_extglob} && shopt -u extglob
     fi
 }
 
@@ -896,6 +883,90 @@ function bib.relative() {
 # */
 function bib.root() {
     (( EUID == 0 ))
+}
+
+
+#/**
+# * A wrapper of “shopt” builtin that preserves the initial state.
+# *
+# * Bash-In-the-Box does not make any assumptions on shell options (apart from
+# * “extglob”); whenever an option needs to be changed, it must be reverted to
+# * its previous value as soon as the code that uses it is executed.
+# *
+# * This function serves this purpose: it can set or unset an option, like the
+# * builtin command does, but can also reset it to the value it had before the
+# * first invocation.
+# *
+# * Syntax: bib.shopt [-r|-s|-u] OPTION
+# *
+# * Options:
+# *
+# * -r : resets the option to the initial value
+# * -s : turns the option on (same beavhior of builtin)
+# * -u : turns the option off (same beavhior of builtin)
+# *
+# * @param OPTION see shopt documentation
+# *
+# * Exit codes:
+# * * E_OK when a valid option is set, unset or reset. When called with no
+# *        options, it means that the option is set (same as builtin shopt)
+# * * E_NOK if an invalid option is used. When called with no options it means
+# *         that the option is unset (same as builtin shopt)
+# */
+function bib.shopt() {
+    local -i _status=${BIB_E_OK}
+    local _option_name
+    local -a _shopt_state
+    local _shopt_option=""
+
+    local OPTION
+    local OPTIND
+    while getopts ":rsu" OPTION
+    do
+        case "${OPTION}" in
+            "r" | "s" | "u" )
+                _shopt_option="-${OPTION}"
+            ;;
+        esac
+    done
+
+    shift $((${OPTIND} - 1))
+
+    _option_name="${1}"
+    [[ -n "${_option_name}" ]] || return ${BIB_E_ARG}
+
+    _shopt_state=( $(shopt "${_option_name}") )
+    _status=${?}
+
+    [[ ! ${_status} && -z "${_shopt_state[1]}" ]] && return ${_status}
+
+    case "${_shopt_option}" in
+        "-r" )
+            [[ ! -v _BIB_SHOPT_STATE["${_option_name}"] ]] && return ${BIB_E_OK}
+            _shopt_option="-u"
+            (( _BIB_SHOPT_STATE["${_option_name}"] )) && _shopt_option="-s"
+            unset _BIB_SHOPT_STATE["${_option_name}"]
+        ;;
+
+        "-s" )
+            if [[ "${_shopt_state[1]}" == "off" ]]
+            then
+                [[ ! -v _BIB_SHOPT_STATE["${_option_name}"] ]] && _BIB_SHOPT_STATE["${_option_name}"]=${BIB_FALSE}
+            fi
+        ;;
+
+        "-u" )
+            if [[ "${_shopt_state[1]}" == "on" ]]
+            then
+                [[ ! -v _BIB_SHOPT_STATE["${_option_name}"] ]] && _BIB_SHOPT_STATE["${_option_name}"]=${BIB_TRUE}
+            fi
+        ;;
+    esac
+
+    shopt ${_shopt_option} "${_option_name}"
+    _status=${?}
+
+    return ${_status}
 }
 
 
@@ -1017,8 +1088,13 @@ function bib.version() {
 ########################################
 
 
+## Base configuration
 [[ -v BIB_CONFIG["interactive"] && ${BIB_CONFIG["interactive"]} == ${BIB_FALSE} ]] && BIB_INTERACTIVE=${BIB_FALSE}
 
 (( BIB_INTERACTIVE )) && (( BIB_CONFIG["style"] )) && bib.include _style
 (( BIB_CONFIG["assert"] )) && bib.include _assert
 (( BIB_CONFIG["redirect"] )) && _bib.redirect
+
+
+## Shell options
+shopt -s extglob
