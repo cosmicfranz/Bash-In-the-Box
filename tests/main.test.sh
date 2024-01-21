@@ -19,6 +19,7 @@ bib_unittest_tests=(
     ["normalize"]=1
     ["print"]=1
     ["relative"]=1
+    ["shopt"]=1
     ["shrink"]=1
     ["title"]=1
     ["today"]=1
@@ -211,6 +212,93 @@ function test_relative() {
                 "$(bib.relative "${_path}")" \
             || _status=${BIB_E_TESTFAIL}
     done
+
+    return ${_status}
+}
+
+
+function test_shopt() {
+    local -i _status=${BIB_E_OK}
+    local _shopt_option
+    local _shopt_initial_state
+
+
+    # Valid option: extglob
+    _shopt_option=( $(shopt extglob) )
+    _shopt_initial_state="${_shopt_option[1]}"
+    shopt -u extglob
+
+    for (( _i=1; _i<=2; _i++ ))
+    do
+        bib.shopt -s extglob
+
+        bib.unittest.assert \
+            -m "Test set valid option (#${_i}) - exit status" \
+            ok ${?} \
+            || _status=${BIB_E_TESTFAIL}
+
+        _shopt_option=( $(shopt extglob) )
+
+        bib.unittest.assert \
+            -m "Check option (#${_i}) - exit status" \
+            ok "${?}" \
+            || _status=${BIB_E_TESTFAIL}
+
+        bib.unittest.assert \
+            -m "Test set valid option (#${_i})" \
+            eq  "on" \
+                "${_shopt_option[1]}" \
+            || _status=${BIB_E_TESTFAIL}
+    done
+
+    # Invalid option: invalidoption
+    bib.shopt -s invalidoption &> /dev/null
+
+    bib.unittest.assert \
+        -m "Test set invalid option - exit status" \
+        nok ${?} \
+        || _status=${BIB_E_TESTFAIL}
+
+    _shopt_option=( $(shopt invalidoption 2> /dev/null ) )
+
+    bib.unittest.assert \
+        -m "Test set invalid option" \
+        null "${_shopt_option[1]}" \
+        || _status=${BIB_E_TESTFAIL}
+
+
+    # unset extglob
+    for (( _i=1; _i<=2; _i++ ))
+    do
+        bib.shopt -u extglob
+
+        bib.unittest.assert \
+            -m "Test unset option (#${_i}) - exit status" \
+            ok ${?} \
+            || _status=${BIB_E_TESTFAIL}
+
+        _shopt_option=( $(bib.shopt extglob) )
+
+        bib.unittest.assert \
+            -m "Check option (#${_i}) - exit status" \
+            nok "${?}" \
+            || _status=${BIB_E_TESTFAIL}
+
+        bib.unittest.assert \
+            -m "Test unset option (#${_i})" \
+            eq  "off" \
+                "${_shopt_option[1]}" \
+            || _status=${BIB_E_TESTFAIL}
+    done
+
+    bib.shopt -r extglob
+    _shopt_option=( $(bib.shopt extglob) )
+
+    bib.unittest.assert \
+        -m "Test reset option" \
+        eq  "off" \
+            "${_shopt_option[1]}" \
+        || _status=${BIB_E_TESTFAIL}
 
     return ${_status}
 }
