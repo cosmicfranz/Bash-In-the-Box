@@ -77,13 +77,13 @@ readonly BIB_REL_MINOR="0"
 # * * “beta[0-9]+” : when a new feature is (almost) complete and stable
 # * * “rc[0-9]+” : release candidate. API is stable, only bugfix are allowed
 # */
-readonly BIB_REL_TYPE="alpha6"
+readonly BIB_REL_TYPE="beta1"
 
 
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20240114"
+readonly BIB_REL_DATE="20240122"
 
 
 ## BOOLEAN CONSTANTS
@@ -322,10 +322,7 @@ fi
 # *
 # * Default value: the filename of the calling script
 # */
-declare BIB_SCRIPT_NAME="$(basename ${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]})"
-[[ -n "${BIB_CONFIG["name"]}" ]] && BIB_SCRIPT_NAME="${BIB_CONFIG["name"]}"
-readonly BIB_SCRIPT_NAME
-
+declare BIB_SCRIPT_NAME
 
 #/**
 # * The long, readable and printable name of the calling script.
@@ -335,9 +332,7 @@ readonly BIB_SCRIPT_NAME
 # *
 # * Default value: the same as BIB_SCRIPT_NAME
 # */
-declare BIB_SCRIPT_LONGNAME="${BIB_SCRIPT_NAME}"
-[[ -n "${BIB_CONFIG["longname"]}" ]] && BIB_SCRIPT_LONGNAME="${BIB_CONFIG["longname"]}"
-readonly BIB_SCRIPT_LONGNAME
+declare BIB_SCRIPT_LONGNAME
 
 
 #/**
@@ -348,9 +343,7 @@ readonly BIB_SCRIPT_LONGNAME
 # *
 # * Default value: the directory containing the filename of the calling script
 # */
-declare BIB_SCRIPT_BASEDIR=$(realpath $(dirname ${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]}))
-[[ -n "${BIB_CONFIG["basedir"]}" ]] && BIB_SCRIPT_BASEDIR="${BIB_CONFIG["basedir"]}"
-readonly BIB_SCRIPT_BASEDIR
+declare BIB_SCRIPT_BASEDIR
 
 
 #/**
@@ -361,9 +354,7 @@ readonly BIB_SCRIPT_BASEDIR
 # *
 # * Default value: the same as BIB_SCRIPT_BASEDIR
 # */
-declare BIB_SCRIPT_RUNTIMEDIR="${BIB_SCRIPT_BASEDIR}"
-[[ -n "${BIB_CONFIG["runtimedir"]}" ]] && BIB_SCRIPT_RUNTIMEDIR="${BIB_CONFIG["runtimedir"]}"
-readonly BIB_SCRIPT_RUNTIMEDIR
+declare BIB_SCRIPT_RUNTIMEDIR
 
 
 #/**
@@ -374,9 +365,7 @@ readonly BIB_SCRIPT_RUNTIMEDIR
 # *
 # * Default value: the same as BIB_SCRIPT_BASEDIR
 # */
-declare BIB_SCRIPT_STATEDIR="${BIB_SCRIPT_BASEDIR}"
-[[ -n "${BIB_CONFIG["statedir"]}" ]] && BIB_SCRIPT_STATEDIR="${BIB_CONFIG["statedir"]}"
-readonly BIB_SCRIPT_STATEDIR
+declare BIB_SCRIPT_STATEDIR
 
 
 #/**
@@ -1088,13 +1077,35 @@ function bib.version() {
 ########################################
 
 
+## Some initializations
+BIB_SCRIPT_NAME="$(bib.basename ${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]})"
+[[ -n "${BIB_CONFIG["name"]}" ]] && BIB_SCRIPT_NAME="${BIB_CONFIG["name"]}"
+readonly BIB_SCRIPT_NAME
+
+BIB_SCRIPT_LONGNAME="${BIB_SCRIPT_NAME}"
+[[ -n "${BIB_CONFIG["longname"]}" ]] && BIB_SCRIPT_LONGNAME="${BIB_CONFIG["longname"]}"
+readonly BIB_SCRIPT_LONGNAME
+
+BIB_SCRIPT_BASEDIR=$(realpath $(bib.dirname ${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]}))
+[[ -n "${BIB_CONFIG["basedir"]}" ]] && BIB_SCRIPT_BASEDIR="${BIB_CONFIG["basedir"]}"
+readonly BIB_SCRIPT_BASEDIR
+
+BIB_SCRIPT_RUNTIMEDIR="${BIB_SCRIPT_BASEDIR}"
+[[ -n "${BIB_CONFIG["runtimedir"]}" ]] && BIB_SCRIPT_RUNTIMEDIR="${BIB_CONFIG["runtimedir"]}"
+readonly BIB_SCRIPT_RUNTIMEDIR
+
+BIB_SCRIPT_STATEDIR="${BIB_SCRIPT_BASEDIR}"
+[[ -n "${BIB_CONFIG["statedir"]}" ]] && BIB_SCRIPT_STATEDIR="${BIB_CONFIG["statedir"]}"
+readonly BIB_SCRIPT_STATEDIR
+
+
+## Shell options
+shopt -s extglob
+
+
 ## Base configuration
 [[ -v BIB_CONFIG["interactive"] && ${BIB_CONFIG["interactive"]} == ${BIB_FALSE} ]] && BIB_INTERACTIVE=${BIB_FALSE}
 
 (( BIB_INTERACTIVE )) && (( BIB_CONFIG["style"] )) && bib.include _style
 (( BIB_CONFIG["assert"] )) && bib.include _assert
 (( BIB_CONFIG["redirect"] )) && _bib.redirect
-
-
-## Shell options
-shopt -s extglob
