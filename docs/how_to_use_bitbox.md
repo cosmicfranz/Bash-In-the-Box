@@ -116,18 +116,52 @@ Currently `main` library exposes a number of base configuration variables, as sh
 
 | Key | Variable | Type | Description |
 | --- | -------- | ---- | ----------- |
-| `name` | `BIB_SCRIPT_NAME` | *string* | The name of the calling script |
-| `longname` | `BIB_SCRIPT_LONGNAME` | *string* | The readable, longer name of the calling script |
-| `version` | `BIB_SCRIPT_VERSION` | *string* | The version string of the calling script |
-| `interactive` | `BIB_INTERACTIVE` | *boolean (0 or 1)* | Can be used to control output messages from the script, as well as other forms of user interaction |
-| `style` | *none* | *boolean (0 or 1)* | If set to 1 (true) enables text style and color |
+| `assert` | *none* | *boolean (0 or 1)* | If set to 1 (true) enables assertions |
 | `basedir` | `BIB_SCRIPT_BASEDIR` | *string* | the directory containing the calling script |
+| `debug` | *none* | *boolean (0 or 1)* | If set to 1 (true) enables debug mode |
+| `interactive` | `BIB_INTERACTIVE` | *boolean (0 or 1)* | Can be used to control output messages from the script, as well as other forms of user interaction |
+| `longname` | `BIB_SCRIPT_LONGNAME` | *string* | The readable, longer name of the calling script |
+| `name` | `BIB_SCRIPT_NAME` | *string* | The name of the calling script |
+| `redirect` | `BIB_REDIRECT` | *boolean (0 or 1)* | If set to 1 (true) redirects stdout and stderr for finer output control (currently untested) |
 | `runtimedir` | `BIB_SCRIPT_RUNTIMEDIR` | *string* | the directory containing runtime data |
 | `statedir` | `BIB_SCRIPT_STATEDIR` | *string* | the directory containing state related data |
-| `debug` | *none* | *boolean (0 or 1)* | If set to 1 (true) enables debug mode |
-| `redirect` | `BIB_REDIRECT` | *boolean (0 or 1)* | If set to 1 (true) redirects stdout and stderr for finer output control (currently untested) |
+| `style` | *none* | *boolean (0 or 1)* | If set to 1 (true) enables text style and color |
+| `version` | `BIB_SCRIPT_VERSION` | *string* | The version string of the calling script |
 
 Other libraries may expose their own configuration variables and related keys of the base configuration.
+
+
+## What’s in the `main` library
+
+Besides configuration variables, `main` defines some useful constants:
+* boolean constants `BIB_TRUE` and `BIB_FALSE`
+* exit/error codes
+* informational constants regarding the version of BItBox in use
+
+Reading the contents of `bitbox/main.lib.sh` can shed a bright light on all of these constants.
+
+The really interesting part, though, consists of many general purpose functions, listed below:
+* `bib.assert()` test that a certain condition is met
+* `bib.basename()` pure Bash implementation of `basename` command
+* `bib.contains()` check whether a substring is found in a string
+* `bib.dirname()` pure Bash implementation of `dirname` command
+* `bib.include()` imports a library
+* `bib.is_absolute()` check if given UNIX path is absolute
+* `bib.is_root()` check if given UNIX path is *root*
+* `bib.log()` send a message to log (actually only a no-op stub)
+* `bib.normalize()` collapse any redundant slashes in a path
+* `bib.not()` logical negation of the input value
+* `bib.ok()` test that a variable contains exit code 0 (OK)
+* `bib.print()` prints a formatted string on the screen
+* `bib.relative()` strip leading slash(es) from a UNIX path
+* `bib.root()` check if current script is being executed as root
+* `bib.shopt()` a wrapper of “shopt” builtin that preserves the initial state
+* `bib.shrink()` collapse redundant spaces in a string
+* `bib.style()` a no-op stub of the function defined in `bitbox/_style.lib.sh`
+* `bib.title()` return a string containing the name and the version of the script
+* `bib.today()` return the current date
+* `bib.version()` return the version string of BItBox
+
 
 
 <hr>
