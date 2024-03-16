@@ -324,6 +324,6 @@ function bib.cfg.from_file() {
     ! bib.contains "/" "${BIB_CONFIG["cfg.file"]}" && \
     BIB_CFG_FILE="${BIB_CONFIG["cfg.file"]}"
 
-[[ -v BIB_CONFIG["cfg.replace_vars"] ]] && BIB_CFG_ENABLE_VAR_REPLACEMENT=$(( BIB_CONFIG["cfg.replace_vars"] || 0 ))
+[[ -v BIB_CONFIG["cfg.replace_vars"] ]] && BIB_CFG_ENABLE_VAR_REPLACEMENT=$(( BIB_CONFIG["cfg.replace_vars"] || BIB_FALSE ))
 
-[[ -v BIB_CONFIG["cfg.continue_on_error"] ]] && BIB_CFG_CONTINUE_ON_ERROR=$(( BIB_CONFIG["cfg.continue_on_error"] || 0 ))
+[[ -v BIB_CONFIG["cfg.continue_on_error"] ]] && BIB_CFG_CONTINUE_ON_ERROR=$(( BIB_CONFIG["cfg.continue_on_error"] || BIB_FALSE ))
