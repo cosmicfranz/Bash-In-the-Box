@@ -1104,8 +1104,8 @@ shopt -s extglob
 
 
 ## Base configuration
-[[ -v BIB_CONFIG["interactive"] && ${BIB_CONFIG["interactive"]} == ${BIB_FALSE} ]] && BIB_INTERACTIVE=${BIB_FALSE}
+[[ -v BIB_CONFIG["interactive"] ]] && BIB_INTERACTIVE=$(( BIB_CONFIG["interactive"] || BIB_FALSE ))
 
-(( BIB_INTERACTIVE )) && (( BIB_CONFIG["style"] )) && bib.include _style
+(( BIB_INTERACTIVE && BIB_CONFIG["style"] )) && bib.include _style
 (( BIB_CONFIG["assert"] )) && bib.include _assert
 (( BIB_CONFIG["redirect"] )) && _bib.redirect

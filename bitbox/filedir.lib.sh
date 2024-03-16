@@ -260,4 +260,4 @@ function bib.filedir.format_size() {
 ########################################
 
 
-(( ${BIB_CONFIG["filedir.enable_bc"]} )) && _BIB_FILEDIR_ENABLE_BC=${BIB_TRUE}
+[[ -v BIB_CONFIG["filedir.enable_bc"] ]] && _BIB_FILEDIR_ENABLE_BC=$(( BIB_CONFIG["filedir.enable_bc"] || BIB_FALSE ))

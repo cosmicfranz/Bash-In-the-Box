@@ -514,7 +514,7 @@ function bib.log() {
 ########################################
 
 
-[[ -v BIB_CONFIG["log.enable"] && ${BIB_CONFIG["log.enable"]} == ${BIB_FALSE} ]] && BIB_LOG_ENABLED=${BIB_FALSE}
+[[ -v BIB_CONFIG["log.enable"] ]] && BIB_LOG_ENABLED=$(( BIB_CONFIG["log.enable"] || BIB_FALSE ))
 
 [[ -v BIB_CONFIG["log.threshold"] ]] && _bib.log.initialize_threshold "${BIB_CONFIG["log.threshold"]}"
 

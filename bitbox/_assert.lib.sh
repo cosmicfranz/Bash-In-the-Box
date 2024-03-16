@@ -338,4 +338,4 @@ function bib.assert() {
 ########################################
 
 
-(( ${BIB_CONFIG["assert.enable"]} )) && BIB_ASSERT_ENABLE=${BIB_TRUE}
+[[ -v BIB_CONFIG["assert.enable"] ]] && BIB_ASSERT_ENABLE=$(( BIB_CONFIG["assert.enable"] || BIB_FALSE ))
