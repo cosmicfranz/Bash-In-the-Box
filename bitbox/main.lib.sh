@@ -1109,3 +1109,6 @@ shopt -s extglob
 (( BIB_INTERACTIVE && BIB_CONFIG["style"] )) && bib.include _style
 (( BIB_CONFIG["assert"] )) && bib.include _assert
 (( BIB_CONFIG["redirect"] )) && _bib.redirect
+
+# Ensures that no spurious status code is returned
+return ${BIB_E_OK}

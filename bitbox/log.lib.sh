@@ -521,3 +521,6 @@ function bib.log() {
 [[ -d "${BIB_CONFIG["log.dir"]}" ]] && BIB_LOG_DIR="${BIB_CONFIG["log.dir"]}"
 
 (( _BIB_LOG_CHANNELS["file"] || _BIB_LOG_DEBUG_MODE )) && _bib.log.initialize_file
+
+# Ensures that no spurious status code is returned
+return ${BIB_E_OK}

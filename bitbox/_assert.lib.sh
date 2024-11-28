@@ -339,3 +339,6 @@ function bib.assert() {
 
 
 [[ -v BIB_CONFIG["assert.enable"] ]] && BIB_ASSERT_ENABLE=$(( BIB_CONFIG["assert.enable"] || BIB_FALSE ))
+
+# Ensures that no spurious status code is returned
+return ${BIB_E_OK}

@@ -327,3 +327,6 @@ function bib.cfg.from_file() {
 [[ -v BIB_CONFIG["cfg.replace_vars"] ]] && BIB_CFG_ENABLE_VAR_REPLACEMENT=$(( BIB_CONFIG["cfg.replace_vars"] || BIB_FALSE ))
 
 [[ -v BIB_CONFIG["cfg.continue_on_error"] ]] && BIB_CFG_CONTINUE_ON_ERROR=$(( BIB_CONFIG["cfg.continue_on_error"] || BIB_FALSE ))
+
+# Ensures that no spurious status code is returned
+return ${BIB_E_OK}
