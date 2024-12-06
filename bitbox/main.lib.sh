@@ -77,13 +77,13 @@ readonly BIB_REL_MINOR="0"
 # * * “beta[0-9]+” : when a new feature is (almost) complete and stable
 # * * “rc[0-9]+” : release candidate. API is stable, only bugfix are allowed
 # */
-readonly BIB_REL_TYPE="rc1"
+readonly BIB_REL_TYPE=""
 
 
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20241129"
+readonly BIB_REL_DATE="20241206"
 
 
 ## BOOLEAN CONSTANTS
