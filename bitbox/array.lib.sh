@@ -110,7 +110,7 @@ function bib.array.copy() {
 # * @param ARRAY2
 # *
 # * Exit codes:
-# * * BIB_E_OK if the two arrays are equal
+# * * BIB_E_OK if array1 equals array2
 # * * BIB_E_NOK otherwise
 # * * BIB_E_ARG if the number of passed arguments is not 2
 # */
@@ -270,6 +270,118 @@ function bib.array.filter() {
 }
 
 
+#/**
+# * Helper function for merging indexed arrays.
+# *
+# * Syntax: _bib.array.merge_indexed RESULT ARRAY1 ARRAY2
+# *
+# * @param RESULT
+# * @param ARRAY1
+# * @param ARRAY2
+# *
+# * Exit codes:
+# * * BIB_E_ARG if the number of passed arguments is not 3
+# */
+function _bib.array.merge_indexed() {
+    (( ${#} == 3 )) || return ${BIB_E_ARG}
+
+    local -n __result="${1}"
+    local -n _array1="${2}"
+    local -n _array2="${3}"
+
+    __result=( "${_array1[@]}" "${_array2[@]}" )
+}
+
+
+#/**
+# * Helper function for merging associative arrays.
+# *
+# * If array1 contains a key “k” that is also present in array2, the result
+# * will contain the value taken from array2 (array2[k]).
+# *
+# * Syntax: _bib.array.merge_associative RESULT ARRAY1 ARRAY2
+# *
+# * @param RESULT
+# * @param ARRAY1
+# * @param ARRAY2
+# *
+# * Exit codes:
+# * * BIB_E_ARG if the number of passed arguments is not 3
+# */
+function _bib.array.merge_associative() {
+    (( ${#} == 3 )) || return ${BIB_E_ARG}
+
+    local -n __result="${1}"
+    local _array1="${2}"
+    local _array2="${3}"
+
+    local _array1_contents="$(eval declare -p ${_array1})"
+    local _array2_contents="$(eval declare -p ${_array2})"
+
+    _array1_contents="${_array1_contents#*=}"
+    _array2_contents="${_array2_contents#*=}"
+    
+   eval __result+=${_array1_contents}
+   eval __result+=${_array2_contents}
+}
+
+
+#/**
+# * Combines two arrays together.
+# *
+# * The behavior depends on the input array types.
+# * If both array1 and array2 are numerically indexed, the result is also an
+# * indexed array containing all the items from array1, then all the items
+# * from array2. The resulting array will be reindexed starting from the items
+# * taken from array1.
+# *
+# * If at least one of the input arrays is associative, the result will
+# * contain all the keys from them, with duplicate keys appearing only once,
+# * with their corresponding values taken from array2.
+# *
+# * Syntax: bib.array.merge RESULT ARRAY1 ARRAY2
+# *
+# * @param RESULT
+# * @param ARRAY1
+# * @param ARRAY2
+# *
+# * Exit codes:
+# * * BIB_E_OK if completed without errors
+# * * BIB_E_TYPE if at least one of the arguments is not an array
+# * * BIB_E_ARG if the number of passed arguments is not 3
+# */
+function bib.array.merge() {
+    (( ${#} == 3 )) || return ${BIB_E_ARG}
+
+    local -n _result="${1}"
+    local -a _arrays=(
+        "${2}"
+        "${3}"
+    )
+    local _array_types
+    local -i _i
+    local -i _status=${BIB_E_OK}
+
+    for _i in 0 1
+    do
+        [[ "$(eval echo \${${_arrays[${_i}]}@a})" =~ [Aa] ]]
+        _status=${?}
+        _array_types+="${BASH_REMATCH[0]}"
+        bib.ok ${_status} || return ${BIB_E_TYPE}
+    done
+
+#    bib.assert eq ${#_array_types} 2
+
+    case "${_array_types}" in
+        "aa" ) # array1 and array2 are indexed
+            _bib.array.merge_indexed _result ${_arrays[@]}
+        ;;
+
+        * )
+            _bib.array.merge_associative _result ${_arrays[@]}
+        ;;
+    esac
+}
+
+
 ########################################
-
-
