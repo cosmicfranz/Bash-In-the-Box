@@ -16,6 +16,7 @@ bib_unittest_tests=(
     ["equal"]=1
     ["equal_not_equal"]=1
     ["exists"]=1
+    ["merge"]=1
     ["filter"]=1
 )
 
@@ -77,6 +78,12 @@ declare -A test_array_11=(
 
 declare -A test_array_12=(
     ["beer"]="José Carreras"
+)
+
+declare -a test_array_13=(
+    "Luciano Pavarotti"
+    "Plácido Domingo"
+    "José Carreras"
 )
 
 
@@ -195,6 +202,70 @@ function test_exists() {
     bib.unittest.assert \
     -m "Test if “burp” exists" \
     nok ${?} \
+    || _status=${BIB_E_TESTFAIL}
+
+    return ${_status}
+}
+
+
+function test_merge() {
+    local -a _result_1
+    local -a _result_2
+    local -a _result_3
+    local -A _result_4
+    local -a _expected_1=(
+        "Athos"
+        "Porthos"
+        "Aramis"
+        "D’Artagnan"
+        "Chip"
+        "Dale"
+    )
+    local -a _expected_2=(
+        "Chip"
+        "Dale"
+        "Luciano Pavarotti"
+        "Plácido Domingo"
+        "José Carreras"
+    )
+    local -n _expected_3="test_array_3"
+    local -A _expected_4=(
+        ["foo"]="Luciano Pavarotti"
+        ["bar"]="Plácido Domingo"
+        ["baz"]="Aramis"
+        ["beer"]="José Carreras"
+    )
+
+    local -i _status=${BIB_E_OK}
+
+    bib.array.merge _result_1 test_array_1 test_array_6
+
+    bib.array.equal _expected_1 _result_1
+    bib.unittest.assert \
+    -m "Test merge two non-empty arrays with numeric indexes" \
+    ok ${?} \
+    || _status=${BIB_E_TESTFAIL}
+
+    bib.array.merge _result_2 test_array_6 test_array_13
+
+    bib.array.equal _expected_2 _result_2
+    bib.unittest.assert \
+    -m "Test merge two non-empty indexed arrays containing spaces inside values" \
+    ok ${?} \
+    || _status=${BIB_E_TESTFAIL}
+
+    bib.array.merge _result_3 test_array_1 test_array_9
+    bib.array.equal _expected_3 _result_3
+    bib.unittest.assert \
+    -m "Test merge array 1 with numeric indexes - array 2 empty" \
+    ok ${?} \
+    || _status=${BIB_E_TESTFAIL}
+
+    bib.array.merge _result_4 test_array_5 test_array_7
+    bib.array.equal _expected_4 _result_4
+    bib.unittest.assert \
+    -m "Test merge two non-empty associative arrays" \
+    ok ${?} \
     || _status=${BIB_E_TESTFAIL}
 
     return ${_status}
