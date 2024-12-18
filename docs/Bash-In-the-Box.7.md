@@ -26,7 +26,7 @@ The relevant directory here is `bitbox`, which contains the actual code.
 
 This directory alone can be copied into the location that contains the calling script; at this point it can be enabled by inserting the following line into the calling script:
 
-    source ${PWD}/bitbox/main.lib.sh
+    source ${PWD}/bitbox/main.lib.sh -
 
 
 # ENVIRONMENT
@@ -37,7 +37,7 @@ The only relevant environment variable is `BIB_HOME`, which can be (optionally) 
 
 A script wanting to use BItBox should contain this line:
 
-    source ${BIB_HOME}/bitbox/main.lib.sh
+    source ${BIB_HOME}/bitbox/main.lib.sh -
 
 If BItBox is embedded into the script directory, `BIB_HOME` can be left unset.
 
