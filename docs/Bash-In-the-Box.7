@@ -1,4 +1,4 @@
-.TH "Bash\-In\-the\-Box" "7" "2023-11-26" "" "Package documentation"
+.TH "Bash\-In\-the\-Box" "7" "2024-12-06" "" "Package documentation"
 
 .SH NAME
 .IP \[bu] 2
@@ -33,7 +33,7 @@ calling script; at this point it can be enabled by inserting the
 following line into the calling script:
 .IP
 .nf
-\f[B]source\f[]\ ${PWD}/bitbox/main.lib.sh
+\f[B]source\f[]\ ${PWD}/bitbox/main.lib.sh -
 .fi
 
 .SH ENVIRONMENT
@@ -50,7 +50,7 @@ it, the following command has to be issued:
 A script wanting to use BItBox should contain this line:
 .IP
 .nf
-\f[B]source\f[]\ ${BIB_HOME}/bitbox/main.lib.sh
+\f[B]source\f[]\ ${BIB_HOME}/bitbox/main.lib.sh -
 .fi
 .PP
 If BItBox is embedded into the script directory, \f[B]BIB_HOME\f[] can
