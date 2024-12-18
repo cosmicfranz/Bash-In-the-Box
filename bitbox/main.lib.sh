@@ -64,7 +64,7 @@ readonly BIB_REL_MAJOR="1"
 # * The intended use case for this number is when an important bug fix or a
 # * backport occurs after a stable release. Can be zero or empty otherwise.
 # */
-readonly BIB_REL_MINOR="0"
+readonly BIB_REL_MINOR="1"
 
 
 #/**
@@ -83,7 +83,7 @@ readonly BIB_REL_TYPE=""
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20241206"
+readonly BIB_REL_DATE="20241219"
 
 
 ## BOOLEAN CONSTANTS
