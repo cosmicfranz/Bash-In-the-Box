@@ -511,19 +511,22 @@ function bib.assert() { : ; }
 # * Syntax: bib.basename PATH
 # *
 # * @param PATH
+# * @return the last part of a path
 # */
 function bib.basename() {
     (( ${#} == 1 )) || return ${BIB_E_ARG}
 
     local _path="${1}"
 
-    _path="${_path%%+(/)}"
-    if [[ -z "${_path}" ]]
+    if bib.is_root "${_path}"
     then
         printf "/"
     else
+        _path="${_path%%+(/)}"
         printf "${_path##*/}"
     fi
+
+    return ${BIB_E_OK}
 }
 
 
