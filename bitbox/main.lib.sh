@@ -539,11 +539,13 @@ function bib.basename() {
 # *
 # * Syntax: bib.contains NEEDLE HAYSTACK
 # *
+# * Exit codes:
+# * * BIB_E_OK if at least one occurrence of NEEDLE is found
+# * * BIB_E_NOK if no occurrences of NEEDLE are found
+# * * BIB_E_ARG if called with wrong number of arguments
+# *
 # * @param NEEDLE the substring to look for. Empty string is “not found”
 # * @param HAYSTACK the string to test
-# * @return BIB_E_OK if at least one occurrence of NEEDLE is found, BIB_E_NOK
-# *         otherwise. BIB_E_ARG is returned if wrong number of arguments is
-# *         given.
 # */
 function bib.contains() {
     (( ${#} == 2 )) || return ${BIB_E_ARG}
@@ -564,6 +566,7 @@ function bib.contains() {
 # * Syntax: bib.dirname PATH
 # *
 # * @param PATH
+# * @return the path to a file or a directory
 # */
 function bib.dirname() {
     (( ${#} == 1 )) || return ${BIB_E_ARG}
@@ -678,7 +681,8 @@ function bib.include() {
 # *
 # * Syntax: bib.is_absolute PATH
 # *
-# * @return BIB_E_OK if path starts with a slash
+# * Exit codes:
+# * * BIB_E_OK if given path starts with a slash
 # */
 function bib.is_absolute() {
     [[ "${1:0:1}" == "/" ]]
@@ -690,7 +694,8 @@ function bib.is_absolute() {
 # *
 # * Syntax: bib.is_root PATH
 # *
-# * @return BIB_E_OK if path is root
+# * Exit codes:
+# * * BIB_E_OK if path is root
 # */
 function bib.is_root() {
     [[ "${1}" =~ ^[/]+$ ]]
@@ -706,7 +711,15 @@ function bib.log() { : ; }
 #/**
 # * Collapses any redundant slashes in a path.
 # *
+# * Examples:
+# * * //usr/local///bin -> /usr/local/bin
+# * * home// -> home/
+# * * /// -> /
+# *
 # * Syntax: bib.normalize PATH
+# *
+# * @return the same path as the input, with each level separated by a single
+# *         slash
 # */
 function bib.normalize() {
     local _path="${1}"
@@ -744,7 +757,8 @@ function bib.not() {
 # *
 # * Syntax: bib.ok STATUS
 # *
-# * @return BIB_E_OK if input argument equals to 0, BIB_E_NOK otherwise
+# * Exit codes:
+# * * BIB_E_OK if input argument equals to BIB_E_OK (i.e. “0”)
 # */
 function bib.ok() {
     (( ${1} == ${BIB_E_OK} ))
@@ -846,6 +860,9 @@ function _bib.redirect() {
 # * If the path does not start with slash(es), it is returned unchanged.
 # *
 # * Syntax: bib.relative PATH
+# *
+# * @param PATH can be absolute or relative
+# * @return same as PATH, with any leading slashes removed
 # */
 function bib.relative() {
     local _path="${1}"
@@ -870,8 +887,8 @@ function bib.relative() {
 # *
 # * Syntax: bib.root
 # *
-# * @return BIB_E_OK if the current effective user is “root”, BIB_E_NOK
-# *         otherwise
+# * Exit codes:
+# * * BIB_E_OK if the current effective user is “root”
 # */
 function bib.root() {
     (( EUID == 0 ))
@@ -882,11 +899,12 @@ function bib.root() {
 # * A wrapper of “shopt” builtin that preserves the initial state.
 # *
 # * Bash-In-the-Box does not make any assumptions on shell options (apart from
-# * “extglob”); whenever an option needs to be changed, it must be reverted to
-# * its previous value as soon as the code that uses it is executed.
+# * “extglob”); whenever an option needs to be changed, it must be possible to
+# * revert it to its previous value as soon as the code that uses it is
+# * executed.
 # *
-# * This function serves this purpose: it can set or unset an option, like the
-# * builtin command does, but can also reset it to the value it had before the
+# * This function behaves pretty much like “shopt”: it can set or unset an
+# * option, but can also reset it to the value it had before the
 # * first invocation.
 # *
 # * Syntax: bib.shopt [-r|-s|-u] OPTION
@@ -900,10 +918,10 @@ function bib.root() {
 # * @param OPTION see shopt documentation
 # *
 # * Exit codes:
-# * * E_OK when a valid option is set, unset or reset. When called with no
-# *        options, it means that the option is set (same as builtin shopt)
-# * * E_NOK if an invalid option is used. When called with no options it means
-# *         that the option is unset (same as builtin shopt)
+# * * BIB_E_OK when a valid option is set, unset or reset. When called with no
+# *            options, it means that the option is set (same as builtin shopt)
+# * * BIB_E_NOK if an invalid option is used. When called with no options it
+# *             means that the option is unset (same as builtin shopt)
 # */
 function bib.shopt() {
     local -i _status=${BIB_E_OK}
