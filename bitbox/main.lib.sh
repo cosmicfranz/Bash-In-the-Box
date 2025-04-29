@@ -83,7 +83,7 @@ readonly BIB_REL_TYPE=""
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20241219"
+readonly BIB_REL_DATE="20250430"
 
 
 ## BOOLEAN CONSTANTS
@@ -300,8 +300,14 @@ readonly BIB_STDERR_ALT=4
 # * * “style” (boolean): if set to 1 (true) enables colors and styles for output
 # *                      messages. Works only if interactive mode is also
 # *                      enabled
+# * * “no_cleanup_on_exit” (boolean): if set to 1 (true) inhibits trapping of
+# *                                   EXIT pseudo-signal, effectively
+# *                                   preventing any cleanup code to be
+# *                                   executed. Note that this is mostly a bad
+# *                                   idea, so this property should be set only
+# *                                   when really needed.
 # *
-# * Note that the keys belong to a top, unnamed namespace. This is only true for
+# * The above keys belong to a top, unnamed namespace. This is only true for
 # * “main” library. Other libraries may define their own names, all preceded by
 # * their namespace, usually the name of the library itself. So, for example,
 # * the fully qualified identifier for a key named “dir” in “log” library will
@@ -487,12 +493,37 @@ declare -A _BIB_LIBS=(
 )
 
 
+#/**
+# * A list of cleanup functions, to be called by _bib.cleanup().
+# *
+# * Note that it is declared as an associative array, just to avoid duplicate
+# * elements. For such purpose, only keys are used, while values are ignored.
+# *
+# * Entries are added by means of bib.add_cleanup_handler().
+# */
+declare -A _BIB_CLEANUP_HANDLERS
+
+
 ########################################
 
 
 ###############
 ## FUNCTIONS ##
 ###############
+
+#/**
+# * Adds a function name to the cleanup handlers list.
+# *
+# * Syntax: bib.add_cleanup_handler FUNCTION_NAME
+# *
+# * @param FUNCTION_NAME
+# */
+function bib.add_cleanup_handler() {
+    (( ${#} == 1 )) || return ${BIB_E_ARG}
+
+    _BIB_CLEANUP_HANDLERS["${1}"]=
+}
+
 
 #/**
 # * NO-OP STUB
@@ -525,6 +556,26 @@ function bib.basename() {
         _path="${_path%%+(/)}"
         printf "${_path##*/}"
     fi
+
+    return ${BIB_E_OK}
+}
+
+
+#/**
+# * Executes cleanup code just before the end of the execution.
+# *
+# * It is automatically called when EXIT pseudo-signal is trapped, unless
+# * “no_cleanup_on_exit” property is set to 1 in the base configuration.
+# *
+# * Syntax: _bib.cleanup
+# */
+function _bib.cleanup() {
+    local _handler
+    for _handler in "${!_BIB_CLEANUP_HANDLERS[@]}"
+    do
+        declare -F "${_handler}" &> /dev/null
+        bib.ok ${?} && ${_handler}
+    done
 
     return ${BIB_E_OK}
 }
@@ -1130,6 +1181,8 @@ shopt -s extglob
 (( BIB_INTERACTIVE && BIB_CONFIG["style"] )) && bib.include _style
 (( BIB_CONFIG["assert"] )) && bib.include _assert
 (( BIB_CONFIG["redirect"] )) && _bib.redirect
+
+(( BIB_CONFIG["no_cleanup_on_exit"] )) || trap "_bib.cleanup" EXIT
 
 # Ensures that no spurious status code is returned
 return ${BIB_E_OK}
