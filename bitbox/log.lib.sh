@@ -436,7 +436,7 @@ function _bib.log.to_syslog() {
 #/**
 # * Sends a log message to enabled channels.
 # *
-# * Syntax: bib.log [-c CHANNEL[,CHANNEL...]] [-f] PRIORITY MESSAGE
+# * Syntax: bib.log [-c CHANNEL[,CHANNEL...]] [-f] PRIORITY MESSAGE [VALUE...]
 # *
 # * Options:
 # * -c [-c CHANNEL[,CHANNEL...]] :
@@ -446,7 +446,11 @@ function _bib.log.to_syslog() {
 # *      function will be included only in messages with “debug” priority
 # *
 # * @param PRIORITY the priority level of the message
-# * @param MESSAGE the text of the message
+# * @param MESSAGE the text of the message; printf-style formatted strings are
+# *                accepted
+# * @param VALUE... if MESSAGE contains one or more printf-style placeholders,
+# *                 they will be substituted by this list of corresponding
+# *                 values
 # */
 function bib.log() {
     (( ${#} > 1 )) || return ${BIB_E_ARG}
