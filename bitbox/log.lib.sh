@@ -1,5 +1,5 @@
 ## Bash-In-the-Box (BItBox)
-## Copyright © 2024 Francesco Napoleoni
+## Copyright © 2025 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-the-Box”.
 ##
@@ -44,20 +44,22 @@
 # * * log.channel.syslog
 # *
 # * The logger can be configured through the following parameters:
-# * * ENABLE (default TRUE)
+# * * CMD_LOGGER (default “logger”)
+# * * DATE_FORMAT (default “%c”)
+# * * DEBUG (default FALSE)
 # * * DIR (default <SCRIPT_BASEDIR>)
+# * * ENABLE (default TRUE)
 # * * FILENAME (default <SCRIPT_NAME>.log)
 # * * THRESHOLD (default NOTICE)
-# * * DATE_FORMAT (default “%c”)
-# * * CMD_LOGGER (default “logger”)
 # *
 # * The corresponding keys of the base configuration are:
-# * * log.enable
+# * * log.cmd.logger
+# * * log.date_format
+# * * log.debug
 # * * log.dir
+# * * log.enable
 # * * log.filename
 # * * log.threshold
-# * * log.date_format
-# * * log.cmd.logger
 # */
 
 
@@ -100,16 +102,6 @@ readonly -a _BIB_LOG_SYSLOG_LEVEL=(
 )
 
 
-## I/O STREAMS
-
-#/**
-# * Reserved file descriptor for logging to file.
-# *
-# * Default value: 5
-# */
-readonly _BIB_LOG_FD=5
-
-
 ## EXIT CODES
 
 #/**
@@ -118,6 +110,16 @@ readonly _BIB_LOG_FD=5
 # * Default value: 12
 # */
 readonly BIB_E_LOG_CHANNEL=12
+
+
+## I/O STREAMS
+
+#/**
+# * Reserved file descriptor for logging to file.
+# *
+# * Default value: 9
+# */
+readonly BIB_LOG_FD=9
 
 
 ########################################
@@ -138,7 +140,7 @@ readonly BIB_E_LOG_CHANNEL=12
 # * Type: boolean
 # * Default value: TRUE
 # */
-declare -gi BIB_LOG_ENABLED=${BIB_TRUE}
+declare -gi BIB_LOG_ENABLE=${BIB_TRUE}
 
 
 #/**
@@ -263,7 +265,7 @@ function _bib.log.initialize_threshold() {
     local _threshold="${1}"
     local -i _t
 
-    if (( _BIB_DEBUG ))
+    if (( BIB_DEBUG ))
     then
         BIB_LOG_THRESHOLD=${BIB_LOG_DEBUG}
     else
@@ -279,14 +281,34 @@ function _bib.log.initialize_threshold() {
 # * Syntax: _bib.log.initialize_file
 # */
 function _bib.log.initialize_file() {
+    local _command="exec ${BIB_LOG_FD}>> ${BIB_LOG_DIR}/${BIB_LOG_FILENAME}"
+
     [[ -n "${BIB_CONFIG["log.filename"]}" ]] && \
-        ! bib.contains "/" "${BIB_CONFIG["log.filename"]}" && \
         BIB_LOG_FILENAME="${BIB_CONFIG["log.filename"]}"
 
-    >> "${BIB_LOG_DIR}/${BIB_LOG_FILENAME}" && \
-    [[ -w "${BIB_LOG_DIR}/${BIB_LOG_FILENAME}" ]] || _BIB_LOG_CHANNELS["file"]=${BIB_FALSE}
+    >> "${BIB_LOG_DIR}/${BIB_LOG_FILENAME}"
+    if [[ ! -w "${BIB_LOG_DIR}/${BIB_LOG_FILENAME}" ]]
+    then
+        _BIB_LOG_CHANNELS["file"]=${BIB_FALSE}
+        return ${BIB_E_LOG_CHANNEL}
+    fi
+
+    eval ${_command}
 }
 
+
+#/**
+# * Closes the log file descriptor, if open.
+# *
+# * Syntax: __bib.log.cleanup
+# */
+function __bib.log.cleanup() {
+    local _command="exec ${BIB_LOG_FD}>&-"
+
+    [[ -e "/dev/fd/${BIB_LOG_FD}" ]] && eval ${_command}
+
+    return ${BIB_E_OK}
+}
 
 #/**
 # * Returns the integer value of the corresponding priority level.
@@ -335,29 +357,19 @@ function _bib.log.level() {
 # * @param PRIORITY
 # */
 function _bib.log.to_file() {
-    local _date
     local _priority="${1}"
     local _label="${2}"
     local _message="${3}"
-    local -i _status=${BIB_E_OK}
-
-    exec 5>> "${BIB_LOG_DIR}/${BIB_LOG_FILENAME}"
-    _status=${?}
+    local _date
+    local _format="%s - [%s] %s: %s\n"
 
     printf -v _date "%(${BIB_LOG_DATE_FORMAT})T" -1
 
-    bib.print    \
-              -n \
-              -d ${_BIB_LOG_FD} \
-              "%s - [%s] %s: %s\n" \
-              "${_date}" \
-              "${_BIB_LOG_SYSLOG_LEVEL["${_priority}"]}" \
-              "${_label}" \
-              "${_message}"
-
-    exec 5>&-
-
-    return ${_status}
+    printf  "${_format}" \
+            "${_date}" \
+            "${_BIB_LOG_SYSLOG_LEVEL["${_priority}"]}" \
+            "${_label}" \
+            "${_message}" >&${BIB_LOG_FD}
 }
 
 
@@ -371,24 +383,21 @@ function _bib.log.to_file() {
 # * @param PRIORITY
 # */
 function _bib.log.to_stderr() {
-    local _date
     local _priority="${1}"
     local _label="${2}"
     local _message="${3}"
-    local -i _status=${BIB_E_OK}
+    local _date
+    local _format="%s - [%s] %s: %s\n"
 
     printf -v _date "%(${BIB_LOG_DATE_FORMAT})T" -1
 
-    bib.print    \
-              -n \
+    bib.print -n \
               -e \
-              "%s - [%s] %s: %s\n" \
+              "${_format}" \
               "${_date}" \
               "${_BIB_LOG_SYSLOG_LEVEL["${_priority}"]}" \
               "${_label}" \
               "${_message}"
-
-    return ${_status}
 }
 
 
@@ -410,7 +419,7 @@ function _bib.log.to_syslog() {
     local _debug_options
     local -i _status=${BIB_E_OK}
 
-    (( _BIB_DEBUG )) && _debug_options="--no-act --stderr"
+    (( BIB_DEBUG )) && _debug_options="--no-act --stderr"
     ${BIB_LOG_CMD_LOGGER} \
         ${_debug_options} \
         --tag "${_label}" \
@@ -427,7 +436,7 @@ function _bib.log.to_syslog() {
 #/**
 # * Sends a log message to enabled channels.
 # *
-# * Syntax: bib.log [-c CHANNEL[,CHANNEL...]] [-f] PRIORITY MESSAGE
+# * Syntax: bib.log [-c CHANNEL[,CHANNEL...]] [-f] PRIORITY MESSAGE [VALUE...]
 # *
 # * Options:
 # * -c [-c CHANNEL[,CHANNEL...]] :
@@ -437,7 +446,11 @@ function _bib.log.to_syslog() {
 # *      function will be included only in messages with “debug” priority
 # *
 # * @param PRIORITY the priority level of the message
-# * @param MESSAGE the text of the message
+# * @param MESSAGE the text of the message; printf-style formatted strings are
+# *                accepted
+# * @param VALUE... if MESSAGE contains one or more printf-style placeholders,
+# *                 they will be substituted by this list of corresponding
+# *                 values
 # */
 function bib.log() {
     (( ${#} > 1 )) || return ${BIB_E_ARG}
@@ -447,9 +460,9 @@ function bib.log() {
     local _message
     local _channel
     local -A _channels_filter=(
-        ["file"]=${BIB_FALSE}
-        ["stderr"]=${BIB_FALSE}
-        ["syslog"]=${BIB_FALSE}
+        ["file"]=${BIB_TRUE}
+        ["stderr"]=${BIB_TRUE}
+        ["syslog"]=${BIB_TRUE}
     )
     local -i _print_function_name=${BIB_FALSE}
     local -i _status=${BIB_E_OK}
@@ -462,6 +475,11 @@ function bib.log() {
         case "${OPTION}" in
             "c" )
                 local _c
+                _channels_filter=(
+                    ["file"]=${BIB_FALSE}
+                    ["stderr"]=${BIB_FALSE}
+                    ["syslog"]=${BIB_FALSE}
+                )
                 IFS=","
                 for _c in ${OPTARG}
                 do
@@ -481,16 +499,22 @@ function bib.log() {
 
     _priority=$(_bib.log.level "${1}")
     (( _priority )) || return ${BIB_E_VALUE}
-    if (( ! _BIB_DEBUG ))
+    if (( ! BIB_DEBUG ))
     then
         (( _priority >= BIB_LOG_THRESHOLD )) || return ${BIB_E_OK}
     fi
     shift
-    _message="${@}"
+
+    _message="${1}"
+    if (( ${#} > 1 ))
+    then
+        shift
+        printf -v _message "${_message}" "${@}"
+    fi
 
     (( _print_function_name || _priority == BIB_LOG_DEBUG )) && _label+=" ${FUNCNAME[1]}()"
 
-    (( _BIB_DEBUG )) && _BIB_LOG_CHANNELS=(
+    (( BIB_DEBUG )) && _BIB_LOG_CHANNELS=(
         ["file"]=${BIB_FALSE}
         ["stderr"]=${BIB_TRUE}
         ["syslog"]=${BIB_FALSE}
@@ -514,13 +538,12 @@ function bib.log() {
 ########################################
 
 
-[[ -v BIB_CONFIG["log.enable"] ]] && BIB_LOG_ENABLED=$(( BIB_CONFIG["log.enable"] || BIB_FALSE ))
-
-[[ -v BIB_CONFIG["log.threshold"] ]] && _bib.log.initialize_threshold "${BIB_CONFIG["log.threshold"]}"
-
+[[ -v BIB_CONFIG["log.enable"] ]] && BIB_LOG_ENABLE=$(( BIB_CONFIG["log.enable"] || BIB_FALSE ))
+[[ ${BIB_DEBUG} == ${BIB_TRUE} || -v BIB_CONFIG["log.threshold"] ]] && _bib.log.initialize_threshold "${BIB_CONFIG["log.threshold"]}"
 [[ -d "${BIB_CONFIG["log.dir"]}" ]] && BIB_LOG_DIR="${BIB_CONFIG["log.dir"]}"
-
 (( _BIB_LOG_CHANNELS["file"] || _BIB_LOG_DEBUG_MODE )) && _bib.log.initialize_file
+
+bib.add_cleanup_handler __bib.log.cleanup
 
 # Ensures that no spurious status code is returned
 return ${BIB_E_OK}

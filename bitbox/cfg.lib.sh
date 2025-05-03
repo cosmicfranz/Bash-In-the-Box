@@ -1,5 +1,5 @@
 ## Bash-In-the-Box (BItBox)
-## Copyright © 2024 Francesco Napoleoni
+## Copyright © 2025 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-the-Box”.
 ##
@@ -110,17 +110,6 @@ readonly BIB_E_CFG_LINE=25
 readonly BIB_E_CFG_KEY=26
 
 
-####################
-
-## CONSTANTS INITIALIZED AT RUNTIME
-
-#/**
-# *
-# */
-#declare -n BIB_CONSTANT_2
-# readonly BIB_CONFIG
-
-
 ########################################
 
 
@@ -229,6 +218,8 @@ function _bib.cfg.replace_variables() {
 # * Exit codes:
 # * * E_OK on successful operation
 # * * E_CFG_SYNTAX if errors are detected in the configuration file
+# * * BIB_E_NEXISTS if the configuration file was not found
+# * * BIB_E_ACCESS if the configuration file was not readable
 # */
 function bib.cfg.from_file() {
     local _cfg_file="${BIB_CFG_DIR}/${BIB_CFG_FILE}"

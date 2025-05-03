@@ -1,5 +1,5 @@
 ## Bash-In-the-Box (BItBox)
-## Copyright © 2024 Francesco Napoleoni
+## Copyright © 2025 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-the-Box”.
 ##
@@ -64,7 +64,7 @@ readonly BIB_REL_MAJOR="1"
 # * The intended use case for this number is when an important bug fix or a
 # * backport occurs after a stable release. Can be zero or empty otherwise.
 # */
-readonly BIB_REL_MINOR="0"
+readonly BIB_REL_MINOR="1"
 
 
 #/**
@@ -83,7 +83,7 @@ readonly BIB_REL_TYPE=""
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20241206"
+readonly BIB_REL_DATE="20250503"
 
 
 ## BOOLEAN CONSTANTS
@@ -253,7 +253,7 @@ readonly BIB_E_ACCESS=9
 # *
 # * Default value: 3
 # */
-readonly BIB_STDOUT_ALT=3
+# readonly BIB_STDOUT_ALT=3
 
 
 #/**
@@ -261,7 +261,7 @@ readonly BIB_STDOUT_ALT=3
 # *
 # * Default value: 4
 # */
-readonly BIB_STDERR_ALT=4
+# readonly BIB_STDERR_ALT=4
 
 
 ####################
@@ -300,8 +300,14 @@ readonly BIB_STDERR_ALT=4
 # * * “style” (boolean): if set to 1 (true) enables colors and styles for output
 # *                      messages. Works only if interactive mode is also
 # *                      enabled
+# * * “no_cleanup_on_exit” (boolean): if set to 1 (true) inhibits trapping of
+# *                                   EXIT pseudo-signal, effectively
+# *                                   preventing any cleanup code to be
+# *                                   executed. Note that this is mostly a bad
+# *                                   idea, so this property should be set only
+# *                                   when really needed.
 # *
-# * Note that the keys belong to a top, unnamed namespace. This is only true for
+# * The above keys belong to a top, unnamed namespace. This is only true for
 # * “main” library. Other libraries may define their own names, all preceded by
 # * their namespace, usually the name of the library itself. So, for example,
 # * the fully qualified identifier for a key named “dir” in “log” library will
@@ -412,9 +418,35 @@ readonly BIB_SCRIPT_VERSION="${BIB_CONFIG["version"]}"
 # * Since some parts of BItBox honor this flag, its use is encouraged anytime
 # * a script needs some type of interaction with the user.
 # *
+# * If debug mode is set, interactive mode is automatically enabled, and the value
+# * of this variable is reset to default.
+# *
 # * Default value: BIB_TRUE
 # */
-declare BIB_INTERACTIVE=${BIB_TRUE}
+declare -i BIB_INTERACTIVE=${BIB_TRUE}
+
+
+#/**
+# * Toggles “silent” mode.
+# *
+# * When set to BIB_TRUE, all messages to standard output or standard error are
+# * suppressed.
+# *
+# * This setting is quite strict, in that it prevents even error messages to be
+# * printed on screen, therefore its use should be planned carefully in order
+# * to avoid losing important information from the script.
+# *
+# * Note that this flag mostly controls functions like bib.print(), bib.error()
+# * and bib.warn(), but does not prevent output from other commands run from
+# * the script. It is up to the developer to control the amount of screen
+# * output of the script.
+# *
+# * If debug mode is set, silent mode is automatically disabled, and the value
+# * of this variable is reset to default.
+# *
+# * Default value: BIB_FALSE
+# */
+declare -i BIB_SILENT=${BIB_FALSE}
 
 
 #/**
@@ -429,9 +461,12 @@ declare BIB_INTERACTIVE=${BIB_TRUE}
 # * down to DEBUG level are shown, unless specific configuration is given in
 # * order to change this behavior. Please read “log” documentation for details.
 # *
+# * If enabled, it overrides both BIB_INTERACTIVE and BIB_SILENT settings,
+# * effectively resetting them to their defaults.
+# *
 # * Default value: FALSE
 # */
-declare -i _BIB_DEBUG=${BIB_CONFIG["debug"]:-${BIB_FALSE}}
+declare -i BIB_DEBUG=${BIB_CONFIG["debug"]:-${BIB_FALSE}}
 
 
 #/**
@@ -442,7 +477,7 @@ declare -i _BIB_DEBUG=${BIB_CONFIG["debug"]:-${BIB_FALSE}}
 # *
 # * Default value: FALSE
 # */
-declare -i BIB_REDIRECT=${BIB_FALSE}
+# declare -i BIB_REDIRECT=${BIB_FALSE}
 
 
 #/**
@@ -487,12 +522,37 @@ declare -A _BIB_LIBS=(
 )
 
 
+#/**
+# * A list of cleanup functions, to be called by _bib.cleanup().
+# *
+# * Note that it is declared as an associative array, just to avoid duplicate
+# * elements. For such purpose, only keys are used, while values are ignored.
+# *
+# * Entries are added by means of bib.add_cleanup_handler().
+# */
+declare -A _BIB_CLEANUP_HANDLERS
+
+
 ########################################
 
 
 ###############
 ## FUNCTIONS ##
 ###############
+
+#/**
+# * Adds a function name to the cleanup handlers list.
+# *
+# * Syntax: bib.add_cleanup_handler FUNCTION_NAME
+# *
+# * @param FUNCTION_NAME
+# */
+function bib.add_cleanup_handler() {
+    (( ${#} == 1 )) || return ${BIB_E_ARG}
+
+    _BIB_CLEANUP_HANDLERS["${1}"]=
+}
+
 
 #/**
 # * NO-OP STUB
@@ -511,19 +571,42 @@ function bib.assert() { : ; }
 # * Syntax: bib.basename PATH
 # *
 # * @param PATH
+# * @return the last part of a path
 # */
 function bib.basename() {
     (( ${#} == 1 )) || return ${BIB_E_ARG}
 
     local _path="${1}"
 
-    _path="${_path%%+(/)}"
-    if [[ -z "${_path}" ]]
+    if bib.is_root "${_path}"
     then
         printf "/"
     else
+        _path="${_path%%+(/)}"
         printf "${_path##*/}"
     fi
+
+    return ${BIB_E_OK}
+}
+
+
+#/**
+# * Executes cleanup code just before the end of the execution.
+# *
+# * It is automatically called when EXIT pseudo-signal is trapped, unless
+# * “no_cleanup_on_exit” property is set to 1 in the base configuration.
+# *
+# * Syntax: _bib.cleanup
+# */
+function _bib.cleanup() {
+    local _handler
+    for _handler in "${!_BIB_CLEANUP_HANDLERS[@]}"
+    do
+        declare -F "${_handler}" &> /dev/null
+        bib.ok ${?} && ${_handler}
+    done
+
+    return ${BIB_E_OK}
 }
 
 
@@ -536,11 +619,13 @@ function bib.basename() {
 # *
 # * Syntax: bib.contains NEEDLE HAYSTACK
 # *
+# * Exit codes:
+# * * BIB_E_OK if at least one occurrence of NEEDLE is found
+# * * BIB_E_NOK if no occurrences of NEEDLE are found
+# * * BIB_E_ARG if called with wrong number of arguments
+# *
 # * @param NEEDLE the substring to look for. Empty string is “not found”
 # * @param HAYSTACK the string to test
-# * @return BIB_E_OK if at least one occurrence of NEEDLE is found, BIB_E_NOK
-# *         otherwise. BIB_E_ARG is returned if wrong number of arguments is
-# *         given.
 # */
 function bib.contains() {
     (( ${#} == 2 )) || return ${BIB_E_ARG}
@@ -561,6 +646,7 @@ function bib.contains() {
 # * Syntax: bib.dirname PATH
 # *
 # * @param PATH
+# * @return the path to a file or a directory
 # */
 function bib.dirname() {
     (( ${#} == 1 )) || return ${BIB_E_ARG}
@@ -592,6 +678,26 @@ function bib.dirname() {
     fi
 
     printf "${_dirname}"
+
+    return ${BIB_E_OK}
+}
+
+
+#/**
+# * Prints an error message to standard error.
+# *
+# * Intended use is to send messages about something critical that happened
+# * during the execution, potentially compromising the rest of it, and that
+# * requires user intervention.
+# *
+# * Syntax: bib.error MESSAGE
+# *
+# * @param MESSAGE a brief description of what happened
+# */
+function bib.error() {
+    local _message="${1}"
+
+    [[ ${BIB_SILENT} == ${BIB_FALSE} && -n "${_message}" ]] && bib.print -e "&RED*%s*&DEF\n" "${_message}"
 
     return ${BIB_E_OK}
 }
@@ -675,7 +781,8 @@ function bib.include() {
 # *
 # * Syntax: bib.is_absolute PATH
 # *
-# * @return BIB_E_OK if path starts with a slash
+# * Exit codes:
+# * * BIB_E_OK if given path starts with a slash
 # */
 function bib.is_absolute() {
     [[ "${1:0:1}" == "/" ]]
@@ -687,7 +794,8 @@ function bib.is_absolute() {
 # *
 # * Syntax: bib.is_root PATH
 # *
-# * @return BIB_E_OK if path is root
+# * Exit codes:
+# * * BIB_E_OK if path is root
 # */
 function bib.is_root() {
     [[ "${1}" =~ ^[/]+$ ]]
@@ -703,7 +811,15 @@ function bib.log() { : ; }
 #/**
 # * Collapses any redundant slashes in a path.
 # *
+# * Examples:
+# * * //usr/local///bin -> /usr/local/bin
+# * * home// -> home/
+# * * /// -> /
+# *
 # * Syntax: bib.normalize PATH
+# *
+# * @return the same path as the input, with each level separated by a single
+# *         slash
 # */
 function bib.normalize() {
     local _path="${1}"
@@ -741,7 +857,8 @@ function bib.not() {
 # *
 # * Syntax: bib.ok STATUS
 # *
-# * @return BIB_E_OK if input argument equals to 0, BIB_E_NOK otherwise
+# * Exit codes:
+# * * BIB_E_OK if input argument equals to BIB_E_OK (i.e. “0”)
 # */
 function bib.ok() {
     (( ${1} == ${BIB_E_OK} ))
@@ -749,9 +866,7 @@ function bib.ok() {
 
 
 #/**
-# * Prints a formatted string on the standard output, and more.
-# *
-# * BIB_INTERACTIVE flag is honored: the input string is sent only if the flag is set to BIB_TRUE.
+# * Prints a formatted string.
 # *
 # * By default, the string is sent to standard output, but can be sent to any
 # * other stream (or, more precisely, file descriptor) via “-d” option. As a
@@ -769,6 +884,12 @@ function bib.ok() {
 # * Note that using “-v” and values after the format string at the same time is
 # * supported; however the array is expanded first, while other values follow.
 # *
+# * BIB_INTERACTIVE flag is honored: when it is set to BIB_TRUE, a message sent
+# * to standard output is discarded.
+# *
+# * If BIB_SILENT flag is set to BIB_TRUE, also messages sent to standard error
+# * are not printed.
+# *
 # * Syntax: bib.print [OPTIONS] FORMAT [VALUE ...]
 # *
 # * Options:
@@ -785,9 +906,8 @@ function bib.ok() {
 # *              string
 # */
 function bib.print() {
-    # Silently return if the calling script is in “non interactive” mode
-    (( ${BIB_INTERACTIVE} )) || return ${BIB_E_OK}
-
+    # Silently return if the calling script is in silent mode
+    (( BIB_SILENT )) && return ${BIB_E_OK}
     local _format
     local -i _fd=${BIB_STDOUT}
     local -i _no_style=${BIB_FALSE}
@@ -818,6 +938,9 @@ function bib.print() {
 
     shift $((${OPTIND} - 1))
 
+    # If in “non interactive” mode, suppress message to stdout
+    (( BIB_INTERACTIVE || _fd != BIB_STDOUT  )) || return ${BIB_E_OK}
+
     _format="${1}"
     (( ! _no_style )) && _format="$(bib.style "${1}")"
     shift
@@ -829,12 +952,12 @@ function bib.print() {
 #/**
 # * Redirects standard output and standard error streams.
 # */
-function _bib.redirect() {
-    eval "exec ${BIB_STDOUT}>&1 ${BIB_STDERR}>&2 1>&- 2>&-"
-    BIB_REDIRECT=${BIB_TRUE}
-    BIB_STDOUT=${BIB_STDOUT_ALT}
-    BIB_STDERR=${BIB_STDERR_ALT}
-}
+# function _bib.redirect() {
+#     eval "exec ${BIB_STDOUT}>&1 ${BIB_STDERR}>&2 1>&- 2>&-"
+#     BIB_REDIRECT=${BIB_TRUE}
+#     BIB_STDOUT=${BIB_STDOUT_ALT}
+#     BIB_STDERR=${BIB_STDERR_ALT}
+# }
 
 
 #/**
@@ -843,6 +966,9 @@ function _bib.redirect() {
 # * If the path does not start with slash(es), it is returned unchanged.
 # *
 # * Syntax: bib.relative PATH
+# *
+# * @param PATH can be absolute or relative
+# * @return same as PATH, with any leading slashes removed
 # */
 function bib.relative() {
     local _path="${1}"
@@ -867,8 +993,8 @@ function bib.relative() {
 # *
 # * Syntax: bib.root
 # *
-# * @return BIB_E_OK if the current effective user is “root”, BIB_E_NOK
-# *         otherwise
+# * Exit codes:
+# * * BIB_E_OK if the current effective user is “root”
 # */
 function bib.root() {
     (( EUID == 0 ))
@@ -879,11 +1005,12 @@ function bib.root() {
 # * A wrapper of “shopt” builtin that preserves the initial state.
 # *
 # * Bash-In-the-Box does not make any assumptions on shell options (apart from
-# * “extglob”); whenever an option needs to be changed, it must be reverted to
-# * its previous value as soon as the code that uses it is executed.
+# * “extglob”); whenever an option needs to be changed, it must be possible to
+# * revert it to its previous value as soon as the code that uses it is
+# * executed.
 # *
-# * This function serves this purpose: it can set or unset an option, like the
-# * builtin command does, but can also reset it to the value it had before the
+# * This function behaves pretty much like “shopt”: it can set or unset an
+# * option, but can also reset it to the value it had before the
 # * first invocation.
 # *
 # * Syntax: bib.shopt [-r|-s|-u] OPTION
@@ -897,10 +1024,10 @@ function bib.root() {
 # * @param OPTION see shopt documentation
 # *
 # * Exit codes:
-# * * E_OK when a valid option is set, unset or reset. When called with no
-# *        options, it means that the option is set (same as builtin shopt)
-# * * E_NOK if an invalid option is used. When called with no options it means
-# *         that the option is unset (same as builtin shopt)
+# * * BIB_E_OK when a valid option is set, unset or reset. When called with no
+# *            options, it means that the option is set (same as builtin shopt)
+# * * BIB_E_NOK if an invalid option is used. When called with no options it
+# *             means that the option is unset (same as builtin shopt)
 # */
 function bib.shopt() {
     local -i _status=${BIB_E_OK}
@@ -1074,6 +1201,26 @@ function bib.version() {
 }
 
 
+#/**
+# * Prints a warning message to standard error.
+# *
+# * Intended use is to send messages about something noteworthy that happened
+# * during the execution. It may be anything that does not compromise the rest
+# * of execution itself, but that the user should be informed about.
+# *
+# * Syntax: bib.warn MESSAGE
+# *
+# * @param MESSAGE a brief description of what happened
+# */
+function bib.warn() {
+    local _message="${1}"
+
+    [[ ${BIB_SILENT} == ${BIB_FALSE} && -n "${_message}" ]] && bib.print -e "&YLW*%s*&DEF\n" "${_message}"
+
+    return ${BIB_E_OK}
+}
+
+
 ########################################
 
 
@@ -1104,11 +1251,30 @@ shopt -s extglob
 
 
 ## Base configuration
-[[ -v BIB_CONFIG["interactive"] ]] && BIB_INTERACTIVE=$(( BIB_CONFIG["interactive"] || BIB_FALSE ))
+# [[ -v BIB_CONFIG["interactive"] ]] && BIB_INTERACTIVE=$(( BIB_CONFIG["interactive"] || BIB_FALSE ))
 
-(( BIB_INTERACTIVE && BIB_CONFIG["style"] )) && bib.include _style
-(( BIB_CONFIG["assert"] )) && bib.include _assert
-(( BIB_CONFIG["redirect"] )) && _bib.redirect
+if (( ! BIB_DEBUG ))
+then
+    [[ -v BIB_CONFIG["silent"] ]] && BIB_SILENT=${BIB_CONFIG["silent"]}
+    if (( ! BIB_SILENT ))
+    then
+        [[ -v BIB_CONFIG["interactive"] ]] && BIB_INTERACTIVE=${BIB_CONFIG["interactive"]}
+        [[ -v BIB_CONFIG["style"] ]] && bib.include _style
+    else
+        BIB_INTERACTIVE=${BIB_FALSE}
+    fi
+
+    (( BIB_CONFIG["assert"] )) && bib.include _assert
+else
+    bib.include _assert
+    bib.include _style
+
+    bib.warn "DEBUG MODE ENABLED"
+fi
+
+# (( BIB_CONFIG["redirect"] )) && _bib.redirect
+
+(( BIB_CONFIG["no_cleanup_on_exit"] )) || trap "_bib.cleanup" EXIT
 
 # Ensures that no spurious status code is returned
 return ${BIB_E_OK}
