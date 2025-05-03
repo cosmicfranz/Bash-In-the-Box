@@ -83,7 +83,7 @@ readonly BIB_REL_TYPE=""
 #/**
 # * BItBox release date, formatted as YYYYMMDD.
 # */
-readonly BIB_REL_DATE="20250430"
+readonly BIB_REL_DATE="20250503"
 
 
 ## BOOLEAN CONSTANTS
@@ -253,7 +253,7 @@ readonly BIB_E_ACCESS=9
 # *
 # * Default value: 3
 # */
-readonly BIB_STDOUT_ALT=3
+# readonly BIB_STDOUT_ALT=3
 
 
 #/**
@@ -261,7 +261,7 @@ readonly BIB_STDOUT_ALT=3
 # *
 # * Default value: 4
 # */
-readonly BIB_STDERR_ALT=4
+# readonly BIB_STDERR_ALT=4
 
 
 ####################
@@ -418,9 +418,35 @@ readonly BIB_SCRIPT_VERSION="${BIB_CONFIG["version"]}"
 # * Since some parts of BItBox honor this flag, its use is encouraged anytime
 # * a script needs some type of interaction with the user.
 # *
+# * If debug mode is set, interactive mode is automatically enabled, and the value
+# * of this variable is reset to default.
+# *
 # * Default value: BIB_TRUE
 # */
-declare BIB_INTERACTIVE=${BIB_TRUE}
+declare -i BIB_INTERACTIVE=${BIB_TRUE}
+
+
+#/**
+# * Toggles “silent” mode.
+# *
+# * When set to BIB_TRUE, all messages to standard output or standard error are
+# * suppressed.
+# *
+# * This setting is quite strict, in that it prevents even error messages to be
+# * printed on screen, therefore its use should be planned carefully in order
+# * to avoid losing important information from the script.
+# *
+# * Note that this flag mostly controls functions like bib.print(), bib.error()
+# * and bib.warn(), but does not prevent output from other commands run from
+# * the script. It is up to the developer to control the amount of screen
+# * output of the script.
+# *
+# * If debug mode is set, silent mode is automatically disabled, and the value
+# * of this variable is reset to default.
+# *
+# * Default value: BIB_FALSE
+# */
+declare -i BIB_SILENT=${BIB_FALSE}
 
 
 #/**
@@ -435,9 +461,12 @@ declare BIB_INTERACTIVE=${BIB_TRUE}
 # * down to DEBUG level are shown, unless specific configuration is given in
 # * order to change this behavior. Please read “log” documentation for details.
 # *
+# * If enabled, it overrides both BIB_INTERACTIVE and BIB_SILENT settings,
+# * effectively resetting them to their defaults.
+# *
 # * Default value: FALSE
 # */
-declare -i _BIB_DEBUG=${BIB_CONFIG["debug"]:-${BIB_FALSE}}
+declare -i BIB_DEBUG=${BIB_CONFIG["debug"]:-${BIB_FALSE}}
 
 
 #/**
@@ -448,7 +477,7 @@ declare -i _BIB_DEBUG=${BIB_CONFIG["debug"]:-${BIB_FALSE}}
 # *
 # * Default value: FALSE
 # */
-declare -i BIB_REDIRECT=${BIB_FALSE}
+# declare -i BIB_REDIRECT=${BIB_FALSE}
 
 
 #/**
@@ -655,6 +684,26 @@ function bib.dirname() {
 
 
 #/**
+# * Prints an error message to standard error.
+# *
+# * Intended use is to send messages about something critical that happened
+# * during the execution, potentially compromising the rest of it, and that
+# * requires user intervention.
+# *
+# * Syntax: bib.error MESSAGE
+# *
+# * @param MESSAGE a brief description of what happened
+# */
+function bib.error() {
+    local _message="${1}"
+
+    [[ ${BIB_SILENT} == ${BIB_FALSE} && -n "${_message}" ]] && bib.print -e "&RED*%s*&DEF\n" "${_message}"
+
+    return ${BIB_E_OK}
+}
+
+
+#/**
 # * Imports a library into the script.
 # *
 # * It is a wrapper of “source” builtin that prevents multiple imports of the
@@ -817,9 +866,7 @@ function bib.ok() {
 
 
 #/**
-# * Prints a formatted string on the standard output, and more.
-# *
-# * BIB_INTERACTIVE flag is honored: the input string is sent only if the flag is set to BIB_TRUE.
+# * Prints a formatted string.
 # *
 # * By default, the string is sent to standard output, but can be sent to any
 # * other stream (or, more precisely, file descriptor) via “-d” option. As a
@@ -837,6 +884,12 @@ function bib.ok() {
 # * Note that using “-v” and values after the format string at the same time is
 # * supported; however the array is expanded first, while other values follow.
 # *
+# * BIB_INTERACTIVE flag is honored: when it is set to BIB_TRUE, a message sent
+# * to standard output is discarded.
+# *
+# * If BIB_SILENT flag is set to BIB_TRUE, also messages sent to standard error
+# * are not printed.
+# *
 # * Syntax: bib.print [OPTIONS] FORMAT [VALUE ...]
 # *
 # * Options:
@@ -853,9 +906,8 @@ function bib.ok() {
 # *              string
 # */
 function bib.print() {
-    # Silently return if the calling script is in “non interactive” mode
-    (( ${BIB_INTERACTIVE} )) || return ${BIB_E_OK}
-
+    # Silently return if the calling script is in silent mode
+    (( BIB_SILENT )) && return ${BIB_E_OK}
     local _format
     local -i _fd=${BIB_STDOUT}
     local -i _no_style=${BIB_FALSE}
@@ -886,6 +938,9 @@ function bib.print() {
 
     shift $((${OPTIND} - 1))
 
+    # If in “non interactive” mode, suppress message to stdout
+    (( BIB_INTERACTIVE || _fd != BIB_STDOUT  )) || return ${BIB_E_OK}
+
     _format="${1}"
     (( ! _no_style )) && _format="$(bib.style "${1}")"
     shift
@@ -897,12 +952,12 @@ function bib.print() {
 #/**
 # * Redirects standard output and standard error streams.
 # */
-function _bib.redirect() {
-    eval "exec ${BIB_STDOUT}>&1 ${BIB_STDERR}>&2 1>&- 2>&-"
-    BIB_REDIRECT=${BIB_TRUE}
-    BIB_STDOUT=${BIB_STDOUT_ALT}
-    BIB_STDERR=${BIB_STDERR_ALT}
-}
+# function _bib.redirect() {
+#     eval "exec ${BIB_STDOUT}>&1 ${BIB_STDERR}>&2 1>&- 2>&-"
+#     BIB_REDIRECT=${BIB_TRUE}
+#     BIB_STDOUT=${BIB_STDOUT_ALT}
+#     BIB_STDERR=${BIB_STDERR_ALT}
+# }
 
 
 #/**
@@ -1146,6 +1201,26 @@ function bib.version() {
 }
 
 
+#/**
+# * Prints a warning message to standard error.
+# *
+# * Intended use is to send messages about something noteworthy that happened
+# * during the execution. It may be anything that does not compromise the rest
+# * of execution itself, but that the user should be informed about.
+# *
+# * Syntax: bib.warn MESSAGE
+# *
+# * @param MESSAGE a brief description of what happened
+# */
+function bib.warn() {
+    local _message="${1}"
+
+    [[ ${BIB_SILENT} == ${BIB_FALSE} && -n "${_message}" ]] && bib.print -e "&YLW*%s*&DEF\n" "${_message}"
+
+    return ${BIB_E_OK}
+}
+
+
 ########################################
 
 
@@ -1176,11 +1251,28 @@ shopt -s extglob
 
 
 ## Base configuration
-[[ -v BIB_CONFIG["interactive"] ]] && BIB_INTERACTIVE=$(( BIB_CONFIG["interactive"] || BIB_FALSE ))
+# [[ -v BIB_CONFIG["interactive"] ]] && BIB_INTERACTIVE=$(( BIB_CONFIG["interactive"] || BIB_FALSE ))
 
-(( BIB_INTERACTIVE && BIB_CONFIG["style"] )) && bib.include _style
-(( BIB_CONFIG["assert"] )) && bib.include _assert
-(( BIB_CONFIG["redirect"] )) && _bib.redirect
+if (( ! BIB_DEBUG ))
+then
+    [[ -v BIB_CONFIG["silent"] ]] && BIB_SILENT=${BIB_CONFIG["silent"]}
+    if (( ! BIB_SILENT ))
+    then
+        [[ -v BIB_CONFIG["interactive"] ]] && BIB_INTERACTIVE=${BIB_CONFIG["interactive"]}
+        [[ -v BIB_CONFIG["style"] ]] && bib.include _style
+    else
+        BIB_INTERACTIVE=${BIB_FALSE}
+    fi
+
+    (( BIB_CONFIG["assert"] )) && bib.include _assert
+else
+    bib.include _assert
+    bib.include _style
+
+    bib.warn "DEBUG MODE ENABLED"
+fi
+
+# (( BIB_CONFIG["redirect"] )) && _bib.redirect
 
 (( BIB_CONFIG["no_cleanup_on_exit"] )) || trap "_bib.cleanup" EXIT
 
