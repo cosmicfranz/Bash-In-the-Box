@@ -55,7 +55,7 @@ readonly BIB_VERSION="0"
 #/**
 # * BItBox release “major” number.
 # */
-readonly BIB_REL_MAJOR="1"
+readonly BIB_REL_MAJOR="2"
 
 
 #/**
@@ -64,7 +64,7 @@ readonly BIB_REL_MAJOR="1"
 # * The intended use case for this number is when an important bug fix or a
 # * backport occurs after a stable release. Can be zero or empty otherwise.
 # */
-readonly BIB_REL_MINOR="1"
+readonly BIB_REL_MINOR=""
 
 
 #/**
@@ -77,7 +77,7 @@ readonly BIB_REL_MINOR="1"
 # * * “beta[0-9]+” : when a new feature is (almost) complete and stable
 # * * “rc[0-9]+” : release candidate. API is stable, only bugfix are allowed
 # */
-readonly BIB_REL_TYPE=""
+readonly BIB_REL_TYPE="alpha1"
 
 
 #/**
