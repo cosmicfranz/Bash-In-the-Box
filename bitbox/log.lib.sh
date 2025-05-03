@@ -265,7 +265,7 @@ function _bib.log.initialize_threshold() {
     local _threshold="${1}"
     local -i _t
 
-    if (( _BIB_DEBUG ))
+    if (( BIB_DEBUG ))
     then
         BIB_LOG_THRESHOLD=${BIB_LOG_DEBUG}
     else
@@ -419,7 +419,7 @@ function _bib.log.to_syslog() {
     local _debug_options
     local -i _status=${BIB_E_OK}
 
-    (( _BIB_DEBUG )) && _debug_options="--no-act --stderr"
+    (( BIB_DEBUG )) && _debug_options="--no-act --stderr"
     ${BIB_LOG_CMD_LOGGER} \
         ${_debug_options} \
         --tag "${_label}" \
@@ -499,7 +499,7 @@ function bib.log() {
 
     _priority=$(_bib.log.level "${1}")
     (( _priority )) || return ${BIB_E_VALUE}
-    if (( ! _BIB_DEBUG ))
+    if (( ! BIB_DEBUG ))
     then
         (( _priority >= BIB_LOG_THRESHOLD )) || return ${BIB_E_OK}
     fi
@@ -514,7 +514,7 @@ function bib.log() {
 
     (( _print_function_name || _priority == BIB_LOG_DEBUG )) && _label+=" ${FUNCNAME[1]}()"
 
-    (( _BIB_DEBUG )) && _BIB_LOG_CHANNELS=(
+    (( BIB_DEBUG )) && _BIB_LOG_CHANNELS=(
         ["file"]=${BIB_FALSE}
         ["stderr"]=${BIB_TRUE}
         ["syslog"]=${BIB_FALSE}
@@ -539,7 +539,7 @@ function bib.log() {
 
 
 [[ -v BIB_CONFIG["log.enable"] ]] && BIB_LOG_ENABLE=$(( BIB_CONFIG["log.enable"] || BIB_FALSE ))
-[[ -v BIB_CONFIG["log.threshold"] ]] && _bib.log.initialize_threshold "${BIB_CONFIG["log.threshold"]}"
+[[ ${BIB_DEBUG} == ${BIB_TRUE} || -v BIB_CONFIG["log.threshold"] ]] && _bib.log.initialize_threshold "${BIB_CONFIG["log.threshold"]}"
 [[ -d "${BIB_CONFIG["log.dir"]}" ]] && BIB_LOG_DIR="${BIB_CONFIG["log.dir"]}"
 (( _BIB_LOG_CHANNELS["file"] || _BIB_LOG_DEBUG_MODE )) && _bib.log.initialize_file
 
