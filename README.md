@@ -1,8 +1,13 @@
 # Bash-In-the-Box
 
+## Documentation
+
+* [Bash-In-the-Box documentation index](docs/index.md)
+
+
 ## Introduction
 
-A framework for Bash >= 5 aimed at *simplifying* code creation and organization. Indeed, *simplicity* is the keyword, but let me explain better.
+Bash-In-the-Box is a framework for Bash >= 5 aimed at *simplifying* code creation and organization. Indeed, *simplicity* is the keyword, but let me explain better.
 
 In order to obtain such simplicity, this framework has been thought with a few requirements in mind:
 
@@ -10,7 +15,7 @@ In order to obtain such simplicity, this framework has been thought with a few r
 * **unobtrusiveness**, that is, shallow learning curve, no imposition on coding style, no gobbledygook syntax (or, at least, not worse than plain Bash syntax), gradual introduction of features
 * **small code base**
 * **usefulness and modularity**: include only code that is really needed
-* the code has to be **pure Bash**, as much as possible, thus reducing dependencies on external software
+* the code has to be **pure Bash** (as much as possible) thus reducing dependencies on external software
 * at the same time, good coding practices and readability must be encouraged
 * **integration**: developers just have to include Bash-In-the-Box to obtain a (sort of) standard library, logging, configuration, unit testing and other useful tools; no additional downloads, consistent workflow, no unnecessary dependencies
 
@@ -110,7 +115,3 @@ source ${BIB_HOME}/bitbox/main.lib.sh -
 * BItBox
 * BItB
 * BIB
-
-## Documentation
-
-* [Bash-In-the-Box documentation index](docs/index.md)
