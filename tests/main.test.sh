@@ -300,6 +300,8 @@ function test_shopt() {
             "${_shopt_option[1]}" \
         || _status=${BIB_E_TESTFAIL}
 
+    shopt -u extglob
+    [[ "${_shopt_initial_state}" == "on" ]] && shopt -s extglob
     return ${_status}
 }
 
