@@ -131,6 +131,7 @@ readonly -a BIB_E_CODES=(
     [7]="STATE"
     [8]="NEXISTS"
     [9]="ACCESS"
+    [10]="SHELL"
     [12]="LOG_CHANNEL"
     [16]="ASSERTION"
     [17]="TESTFAIL"
@@ -242,6 +243,17 @@ readonly BIB_E_NEXISTS=8
 # * Default value: 9
 # */
 readonly BIB_E_ACCESS=9
+
+
+#/**
+# * Shell error.
+# *
+# * Occurs when something strange happened to the shell, such as an environment
+# * variable or an option set to a wrong value.
+# *
+# * Default value: 10
+# */
+readonly BIB_E_SHELL=10
 
 
 ## CONSOLE I/O STREAMS
@@ -830,7 +842,11 @@ function bib.normalize() {
         return
     fi
 
+    bib.shopt extglob &> /dev/null || bib.shopt -s extglob
     printf "${_path//+(\/)//}"
+    bib.shopt -r extglob
+
+    return ${BIB_E_OK}
 }
 
 
@@ -1018,8 +1034,8 @@ function bib.root() {
 # * Options:
 # *
 # * -r : resets the option to the initial value
-# * -s : turns the option on (same beavhior of builtin)
-# * -u : turns the option off (same beavhior of builtin)
+# * -s : turns the option on (same behavior of builtin)
+# * -u : turns the option off (same behavior of builtin)
 # *
 # * @param OPTION see shopt documentation
 # *
@@ -1247,7 +1263,7 @@ readonly BIB_SCRIPT_STATEDIR
 
 
 ## Shell options
-shopt -s extglob
+bib.shopt -s extglob
 
 
 ## Base configuration
