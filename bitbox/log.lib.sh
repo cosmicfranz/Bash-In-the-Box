@@ -1,5 +1,5 @@
 ## Bash-In-the-Box (BItBox)
-## Copyright © 2025 Francesco Napoleoni
+## Copyright © 2026 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-the-Box”.
 ##
