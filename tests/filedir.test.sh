@@ -29,8 +29,8 @@ declare -A testfiles_sizes=(
 function setup() {
     mkdir ${test_dir}
 
-    dd if=/dev/zero of=${test_dir}/testfile.1 bs=${testfiles_sizes["testfile.1"]} count=1
-    dd if=/dev/zero of=${test_dir}/testfile.2 bs=1 count=0 seek=${testfiles_sizes["testfile.2"]}
+    dd if=/dev/zero of=${test_dir}/testfile.1 bs=${testfiles_sizes["testfile.1"]} count=1 status=none
+    dd if=/dev/zero of=${test_dir}/testfile.2 bs=1 count=0 seek=${testfiles_sizes["testfile.2"]} status=none
 }
 
 function teardown() {

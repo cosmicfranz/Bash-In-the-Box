@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash-In-the-Box (BItBox)
-## Copyright © 2024 Francesco Napoleoni
+## Copyright © 2026 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-the-Box”.
 ##
@@ -22,40 +22,55 @@
 ########################################
 
 
-declare -a tests=(
-    "main"
-    "style"
-    "filedir"
-    "array"
-    "cfg"
-    "log"
-)
+#/**
+# * Runs one or more unit tests.
+# *
+# * Syntax:
+# *
+# *     bib-testrunner [-d TESTS_PATH] [-v] [TEST_NAME ...]
+# *     bib-testrunner -h
+# *
+# * Options:
+# *
+# * -d TESTS_PATH : tells the script to look for configuration and testfiles in
+# *                 TESTS_PATH (may be absolute or relative path)
+# * -v : enables verbose outpur messages
+# * -h : displays a help message
+# *
+# * @param TEST_NAME one or more names of the tests to execute. Overrides the
+# *                  list found in “tests.conf”
+# *
+# * By default configuration and testfiles are expected to reside in a
+# * directory called “tests”, under the root of the project.
+# *
+# * If called without arguments, bib-testrunner looks for “tests/tests.conf”
+# * inside the current working directory, then executes all the enabled tests
+# * listed inside.
+# *
+# * Such configuration file is actually a Bash source file that only contains
+# * the assignment of an associative array, not surprisingly called... “TESTS”,
+# * which contains the names of all registered tests as keys, each one mapped
+# * to a boolean value (0 or 1), which enables its execution. If the flag is
+# * set to 0, the test is skipped.
+# */
 
-declare -A tests_enabled=(
-    ["main"]=1
-    ["style"]=1
-    ["filedir"]=1
-    ["array"]=1
-    ["cfg"]=1
-    ["log"]=1
-)
 
-declare -A tests_results
+########################################
+
 
 declare -A conf=(
     ["interactive"]=1
-    ["name"]="bitbox_test"
-    ["longname"]="Bash-In-the-Box test suite"
+#     ["name"]="bitbox_test"
+    ["longname"]="Bash-In-the-Box test runner"
     ["unittest.verbose"]=0
     ["style"]=1
-    ["version"]="0.1"
 )
 
 source ${BIB_HOME}/bitbox/main.lib.sh conf
 bib.include unittest.unittest
 
-declare test_path="tests"
-declare -i status=${BIB_E_OK}
+declare -A TESTS
+declare TESTS_PATH="${PWD}/tests"
 
 
 ########################################
@@ -65,7 +80,19 @@ declare -i status=${BIB_E_OK}
 ## FUNCTIONS ##
 ###############
 
-function run_test() {
+#/**
+# * Helper function that runs a single test and prints the results.
+# *
+# * Syntax: _run_test TEST_NAME
+# *
+# * @param TEST_NAME
+# *
+# * Exit codes:
+# * * BIB_E_OK
+# * * BIB_E_NEXISTS if the file containing the test was not found
+# * * BIB_E_TESTFAIL
+# */
+function _run_test() {
     local _test_name
     local _test_path
     local _test_code
@@ -73,7 +100,7 @@ function run_test() {
 
     _test_name="${1}"
 
-    _test_path+="${test_path}/${_test_name}.test.sh"
+    _test_path+="${TESTS_PATH}/${_test_name}.test.sh"
 
     [[ -f "${_test_path}" ]] || return ${BIB_E_NEXISTS}
 
@@ -99,37 +126,132 @@ exit \${status}
 }
 
 
-########################################
+#/**
+# * Runs the test suite.
+# *
+# * Syntax: run_test TEST_NAME
+# *
+# * @param TEST_NAME
+# *
+# * Exit codes:
+# * * BIB_E_OK
+# * * BIB_E_TESTFAIL
+# */
+function run_tests() {
+    local -n _tests="${1}"
+    local _test
+    local -i _status=${BIB_E_OK}
+    local -i _i=0
 
+    (( ${#_tests[@]} > 0 )) || return ${BIB_E_NOK}
 
-# trap 'echo "Ciao!"' ERR
+    for _test in ${!_tests[@]}
+    do
+        if (( ! _tests["${_test}"] ))
+        then
+            bib.print "*Test “${_test}” skipped*\n"
+            (( _i++ ))
+            continue
+        fi
 
-for test in ${tests[@]}
-do
-    if (( tests_enabled["${test}"] ))
-    then
-        bib.print "Testing “${test}”\n"
+        (( _i > 0 )) && bib.print -n "\n----------\n\n"
+        bib.print -n "Testing “${_test}”\n"
 
-        run_test "${test}"
+        _run_test "${_test}"
         case ${?} in
             ${BIB_E_NEXISTS} )
-                bib.print "&RED*Test “${test}” not found in path*\n"
-                status=${BIB_E_NOK}
+                bib.print "&RED*Test “${_test}” not found in path*\n"
+                _status=${BIB_E_NOK}
             ;;
 
             ${BIB_E_TESTFAIL} )
-                bib.print "&YLW*Test “${test}” failed*\n"
-                status=${BIB_E_NOK}
+                bib.print "&YLW*Test “${_test}” failed*\n"
+                _status=${BIB_E_NOK}
             ;;
 
             ${BIB_E_OK} )
-                bib.print "&GRN*Test “${test}” OK*\n"
+                bib.print "&GRN*Test “${_test}” OK*\n"
             ;;
         esac
 
-    else
-        bib.print "*Test “${test}” skipped*\n"
-    fi
+        (( _i++ ))
+    done
+
+    return ${_status}
+}
+
+
+#/**
+# * Displays help message.
+# *
+# * Syntax: help_message
+# */
+function help_message() {
+    local _message="$(bib.title)\n"
+    _message+="Copyright © 2026 Francesco Napoleoni\n"
+    _message+="
+Runs one or more unit tests.
+
+Syntax:
+
+    bib-testrunner [-d TESTS_PATH] [-v] [TEST_NAME ...]
+    bib-testrunner -h
+
+Options:
+
+    -d TESTS_PATH : tells the script to look for configuration and testfiles in
+                    TESTS_PATH (may be absolute or relative path)
+    -v : enables verbose outpur messages
+    -h : displays this help message
+"
+
+    bib.print -n "${_message}"
+}
+
+
+########################################
+
+
+##########
+## MAIN ##
+##########
+
+
+while getopts ":d:hv" OPTION
+do
+    case "${OPTION}" in
+        "d" )
+            TESTS_PATH="${OPTARG}"
+        ;;
+
+        "h" )
+            help_message
+            exit ${BIB_E_OK}
+        ;;
+
+        "v" )
+            BIB_UNITTEST_VERBOSE=${BIB_TRUE}
+        ;;
+    esac
 done
 
-exit ${status}
+shift $(( OPTIND - 1 ))
+
+if [[ ! -d "${TESTS_PATH}" ]]
+then
+    bib.error "${TESTS_PATH} not found or inaccessible."
+    exit ${BIB_E_NEXISTS}
+fi
+
+if (( ${#} > 0 ))
+then
+    TESTS=()
+    for _test_name in "${@}"
+    do
+        TESTS["${_test_name}"]=1
+    done
+else
+    source "${TESTS_PATH}/tests.conf"
+fi
+
+run_tests TESTS

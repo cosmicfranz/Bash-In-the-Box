@@ -1,5 +1,5 @@
 ## Bash-In-the-Box (BItBox)
-## Copyright © 2025 Francesco Napoleoni
+## Copyright © 2026 Francesco Napoleoni
 ##
 ## This file is part of “Bash-In-the-Box”.
 ##
@@ -177,7 +177,7 @@ function bib.unittest.stats() {
     bib.print "Results:\n"
     for _test in ${!bib_unittest_results[@]}
     do
-        bib.print "${_test}: "
+        bib.print -n "${_test}: "
         if [[ "${bib_unittest_results["${_test}"]}" == "S" ]]
         then
             bib.print "SKIPPED\n"
