@@ -22,20 +22,55 @@
 ########################################
 
 
+#/**
+# * Runs one or more unit tests.
+# *
+# * Syntax:
+# *
+# *     bib-testrunner [-d TESTS_PATH] [-v] [TEST_NAME ...]
+# *     bib-testrunner -h
+# *
+# * Options:
+# *
+# * -d TESTS_PATH : tells the script to look for configuration and testfiles in
+# *                 TESTS_PATH (may be absolute or relative path)
+# * -v : enables verbose outpur messages
+# * -h : displays a help message
+# *
+# * @param TEST_NAME one or more names of the tests to execute. Overrides the
+# *                  list found in “tests.conf”
+# *
+# * By default configuration and testfiles are expected to reside in a
+# * directory called “tests”, under the root of the project.
+# *
+# * If called without arguments, bib-testrunner looks for “tests/tests.conf”
+# * inside the current working directory, then executes all the enabled tests
+# * listed inside.
+# *
+# * Such configuration file is actually a Bash source file that only contains
+# * the assignment of an associative array, not surprisingly called... “TESTS”,
+# * which contains the names of all registered tests as keys, each one mapped
+# * to a boolean value (0 or 1), which enables its execution. If the flag is
+# * set to 0, the test is skipped.
+# */
+
+
+########################################
+
+
 declare -A conf=(
     ["interactive"]=1
 #     ["name"]="bitbox_test"
     ["longname"]="Bash-In-the-Box test runner"
     ["unittest.verbose"]=0
     ["style"]=1
-    ["version"]="0.1"
 )
 
 source ${BIB_HOME}/bitbox/main.lib.sh conf
 bib.include unittest.unittest
 
 declare -A TESTS
-declare TEST_PATH="${PWD}/tests"
+declare TESTS_PATH="${PWD}/tests"
 
 
 ########################################
@@ -65,7 +100,7 @@ function _run_test() {
 
     _test_name="${1}"
 
-    _test_path+="${TEST_PATH}/${_test_name}.test.sh"
+    _test_path+="${TESTS_PATH}/${_test_name}.test.sh"
 
     [[ -f "${_test_path}" ]] || return ${BIB_E_NEXISTS}
 
@@ -146,6 +181,34 @@ function run_tests() {
 }
 
 
+#/**
+# * Displays help message.
+# *
+# * Syntax: help_message
+# */
+function help_message() {
+    local _message="$(bib.title)\n"
+    _message+="Copyright © 2026 Francesco Napoleoni\n"
+    _message+="
+Runs one or more unit tests.
+
+Syntax:
+
+    bib-testrunner [-d TESTS_PATH] [-v] [TEST_NAME ...]
+    bib-testrunner -h
+
+Options:
+
+    -d TESTS_PATH : tells the script to look for configuration and testfiles in
+                    TESTS_PATH (may be absolute or relative path)
+    -v : enables verbose outpur messages
+    -h : displays this help message
+"
+
+    bib.print -n "${_message}"
+}
+
+
 ########################################
 
 
@@ -154,11 +217,16 @@ function run_tests() {
 ##########
 
 
-while getopts ":d:v" OPTION
+while getopts ":d:hv" OPTION
 do
     case "${OPTION}" in
         "d" )
-            TEST_PATH="${OPTARG}"
+            TESTS_PATH="${OPTARG}"
+        ;;
+
+        "h" )
+            help_message
+            exit ${BIB_E_OK}
         ;;
 
         "v" )
@@ -169,9 +237,9 @@ done
 
 shift $(( OPTIND - 1 ))
 
-if [[ ! -d "${TEST_PATH}" ]]
+if [[ ! -d "${TESTS_PATH}" ]]
 then
-    bib.error "${TEST_PATH} not found or inaccessible."
+    bib.error "${TESTS_PATH} not found or inaccessible."
     exit ${BIB_E_NEXISTS}
 fi
 
@@ -183,7 +251,7 @@ then
         TESTS["${_test_name}"]=1
     done
 else
-    source "${TEST_PATH}/tests.conf"
+    source "${TESTS_PATH}/tests.conf"
 fi
 
 run_tests TESTS
