@@ -177,7 +177,7 @@ function bib.unittest.stats() {
     bib.print "Results:\n"
     for _test in ${!bib_unittest_results[@]}
     do
-        bib.print "${_test}: "
+        bib.print -n "${_test}: "
         if [[ "${bib_unittest_results["${_test}"]}" == "S" ]]
         then
             bib.print "SKIPPED\n"

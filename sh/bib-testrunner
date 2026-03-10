@@ -22,30 +22,10 @@
 ########################################
 
 
-declare -a tests=(
-    "main"
-    "style"
-    "filedir"
-    "array"
-    "cfg"
-    "log"
-)
-
-declare -A tests_enabled=(
-    ["main"]=1
-    ["style"]=1
-    ["filedir"]=1
-    ["array"]=1
-    ["cfg"]=1
-    ["log"]=1
-)
-
-declare -A tests_results
-
 declare -A conf=(
     ["interactive"]=1
-    ["name"]="bitbox_test"
-    ["longname"]="Bash-In-the-Box test suite"
+#     ["name"]="bitbox_test"
+    ["longname"]="Bash-In-the-Box test runner"
     ["unittest.verbose"]=0
     ["style"]=1
     ["version"]="0.1"
@@ -54,8 +34,8 @@ declare -A conf=(
 source ${BIB_HOME}/bitbox/main.lib.sh conf
 bib.include unittest.unittest
 
-declare test_path="tests"
-declare -i status=${BIB_E_OK}
+declare -A TESTS
+declare TEST_PATH="${PWD}/tests"
 
 
 ########################################
@@ -65,7 +45,19 @@ declare -i status=${BIB_E_OK}
 ## FUNCTIONS ##
 ###############
 
-function run_test() {
+#/**
+# * Helper function that runs a single test and prints the results.
+# *
+# * Syntax: _run_test TEST_NAME
+# *
+# * @param TEST_NAME
+# *
+# * Exit codes:
+# * * BIB_E_OK
+# * * BIB_E_NEXISTS if the file containing the test was not found
+# * * BIB_E_TESTFAIL
+# */
+function _run_test() {
     local _test_name
     local _test_path
     local _test_code
@@ -73,7 +65,7 @@ function run_test() {
 
     _test_name="${1}"
 
-    _test_path+="${test_path}/${_test_name}.test.sh"
+    _test_path+="${TEST_PATH}/${_test_name}.test.sh"
 
     [[ -f "${_test_path}" ]] || return ${BIB_E_NEXISTS}
 
@@ -99,37 +91,99 @@ exit \${status}
 }
 
 
-########################################
+#/**
+# * Runs the test suite.
+# *
+# * Syntax: run_test TEST_NAME
+# *
+# * @param TEST_NAME
+# *
+# * Exit codes:
+# * * BIB_E_OK
+# * * BIB_E_TESTFAIL
+# */
+function run_tests() {
+    local -n _tests="${1}"
+    local _test
+    local -i _status=${BIB_E_OK}
+    local -i _i=0
 
+    (( ${#_tests[@]} > 0 )) || return ${BIB_E_NOK}
 
-# trap 'echo "Ciao!"' ERR
+    for _test in ${!_tests[@]}
+    do
+        if (( ! _tests["${_test}"] ))
+        then
+            bib.print "*Test “${_test}” skipped*\n"
+            (( _i++ ))
+            continue
+        fi
 
-for test in ${tests[@]}
-do
-    if (( tests_enabled["${test}"] ))
-    then
-        bib.print "Testing “${test}”\n"
+        (( _i > 0 )) && bib.print -n "\n----------\n\n"
+        bib.print -n "Testing “${_test}”\n"
 
-        run_test "${test}"
+        _run_test "${_test}"
         case ${?} in
             ${BIB_E_NEXISTS} )
-                bib.print "&RED*Test “${test}” not found in path*\n"
-                status=${BIB_E_NOK}
+                bib.print "&RED*Test “${_test}” not found in path*\n"
+                _status=${BIB_E_NOK}
             ;;
 
             ${BIB_E_TESTFAIL} )
-                bib.print "&YLW*Test “${test}” failed*\n"
-                status=${BIB_E_NOK}
+                bib.print "&YLW*Test “${_test}” failed*\n"
+                _status=${BIB_E_NOK}
             ;;
 
             ${BIB_E_OK} )
-                bib.print "&GRN*Test “${test}” OK*\n"
+                bib.print "&GRN*Test “${_test}” OK*\n"
             ;;
         esac
 
-    else
-        bib.print "*Test “${test}” skipped*\n"
-    fi
+        (( _i++ ))
+    done
+
+    return ${_status}
+}
+
+
+########################################
+
+
+##########
+## MAIN ##
+##########
+
+
+while getopts ":d:v" OPTION
+do
+    case "${OPTION}" in
+        "d" )
+            TEST_PATH="${OPTARG}"
+        ;;
+
+        "v" )
+            BIB_UNITTEST_VERBOSE=${BIB_TRUE}
+        ;;
+    esac
 done
 
-exit ${status}
+shift $(( OPTIND - 1 ))
+
+if [[ ! -d "${TEST_PATH}" ]]
+then
+    bib.error "${TEST_PATH} not found or inaccessible."
+    exit ${BIB_E_NEXISTS}
+fi
+
+if (( ${#} > 0 ))
+then
+    TESTS=()
+    for _test_name in "${@}"
+    do
+        TESTS["${_test_name}"]=1
+    done
+else
+    source "${TEST_PATH}/tests.conf"
+fi
+
+run_tests TESTS
